@@ -213,11 +213,6 @@ footer .copy{grid-column:1/-1;font-size:13px;border-top:1px solid var(--line);pa
 .faq summary::after{content:"+";position:absolute;right:0;top:50%;transform:translateY(-50%);font-size:22px;color:var(--accent);font-weight:700}
 .faq details[open] summary::after{content:"−"}
 .faq details p{color:var(--muted);margin:0 0 16px}
-.consent{position:fixed;z-index:40;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));max-width:560px;margin-inline:auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;box-shadow:0 12px 40px rgba(42,21,32,.18);display:grid;gap:12px}
-.consent[hidden]{display:none}
-.consent a{color:var(--accent);font-weight:700}
-.consent p{margin:0;font-size:14px;line-height:1.5}
-.consent .row{display:flex;gap:10px;flex-wrap:wrap}
 @media (prefers-reduced-motion:reduce){.m,.day{animation:none}.btn{transition:none}html{scroll-behavior:auto}}
 </style>
 
@@ -384,9 +379,6 @@ footer .copy{grid-column:1/-1;font-size:13px;border-top:1px solid var(--line);pa
 </footer>
 </div>
 
-<div class="consent" id="consent" role="dialog" aria-label="Згода на аналітику" hidden>
-  <p>Ми використовуємо аналітику (Google Analytics і Microsoft Clarity), щоб бачити, скільки людей відвідує сайт, звідки вони приходять і до якого місця сторінки гортають. Без Вашої згоди вона не вмикається. <a href="privacy.html">Докладніше</a></p>
-  <div class="row"><button class="btn sm" id="cYes" type="button">Прийняти</button><button class="btn sm ghost" id="cNo" type="button">Відхилити</button></div>
 </div>
 
 <script>
@@ -500,11 +492,8 @@ $('form').addEventListener('submit',function(e){
 $('menuBtn').addEventListener('click',function(){var o=$('mnav').classList.toggle('open');this.setAttribute('aria-expanded',o)});
 $('mnav').addEventListener('click',function(e){if(e.target.tagName==='A'){$('mnav').classList.remove('open');$('menuBtn').setAttribute('aria-expanded','false')}});
 
-/* Аналітика. Вставте ID, щоб увімкнути: GA_ID виглядає як G-XXXXXXXXXX, CLARITY_ID це короткий код проєкту. Поки ID порожні, банер і трекінг не з'являються. */
-var GA_ID='',CLARITY_ID='';
-var CK='zavitai_consent';
-function getC(){try{return localStorage.getItem(CK)}catch(e){return null}}
-function setC(v){try{localStorage.setItem(CK,v)}catch(e){}}
+/* Аналітика. Вставте ID, щоб увімкнути: GA_ID виглядає як G-XXXXXXXXXX, CLARITY_ID це короткий код проєкту. Поки ID порожні, аналітика не вмикається. Банера згоди немає: про аналітику сказано в політиці конфіденційності. */
+var GA_ID='G-Y0YC4VDFWT',CLARITY_ID='';
 function track(){
   if(!window.gtag)return;
   var done={};
@@ -528,8 +517,6 @@ function loadAnalytics(){
     (function(c,l,a,rr,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(rr);t.async=1;t.src='https://www.clarity.ms/tag/'+i;y=l.getElementsByTagName(rr)[0];y.parentNode.insertBefore(t,y)})(window,document,'clarity','script',CLARITY_ID);
   }
 }
-if(GA_ID||CLARITY_ID){var cc=getC();if(cc==='yes')loadAnalytics();else if(!cc)$('consent').hidden=false}
-$('cYes').addEventListener('click',function(){setC('yes');$('consent').hidden=true;loadAnalytics()});
-$('cNo').addEventListener('click',function(){setC('no');$('consent').hidden=true});
+loadAnalytics();
 renderPlans();setNiche('salon');
 </script>
