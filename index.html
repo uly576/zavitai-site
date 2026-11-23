@@ -181,6 +181,8 @@ form input,form select{width:100%;padding:14px 16px;border-radius:var(--r-md);bo
 .chk input{width:18px;height:18px;margin-top:3px;accent-color:var(--accent)}
 .chk a{color:var(--accent)}
 .thanks{background:var(--surface);border-radius:var(--r-md);padding:14px 16px;font-size:14px;border:1.5px solid var(--ok)}
+.thanks.err{border-color:var(--bad,#c0392b)}
+.hp{position:absolute!important;left:-9999px;width:1px!important;height:1px;opacity:0;pointer-events:none}
 
 /* footer */
 footer{border-top:1px solid var(--line);padding-block:40px 56px;display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr;gap:28px;font-size:14.5px;color:var(--muted)}
@@ -361,10 +363,13 @@ footer .copy{grid-column:1/-1;font-size:13px;border-top:1px solid var(--line);pa
       <form id="form" autocomplete="off">
         <input id="f_name" placeholder="Ім'я або назва салону" required>
         <input id="f_contact" placeholder="Телефон або Telegram" required>
-        <select id="f_team"><option>1–2 майстри</option><option>3–5 майстрів</option><option>6–10 майстрів</option></select>
+        <select id="f_team" aria-label="Скільки майстрів працює"><option>1–2 майстри</option><option>3–5 майстрів</option><option>6–10 майстрів</option></select>
+        <select id="f_plan" aria-label="Бажаний тариф"><option>Ще не знаю</option><option>Book</option><option>Grow</option><option>Profit</option></select>
+        <input id="f_hp" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
         <label class="chk"><input type="checkbox" id="f_consent" required><span>Погоджуюсь з <a href="offer.html">публічною офертою</a> та <a href="privacy.html">політикою конфіденційності</a></span></label>
         <button class="btn" type="submit">Підключити AI-адміністратора</button>
-        <div class="thanks" id="thanks" hidden>Це макет сторінки: заявка поки нікуди не надсилається.</div>
+        <div class="thanks" id="thanks" hidden>Дякуємо! Ми отримали заявку й напишемо Вам найближчим часом.</div>
+        <div class="thanks err" id="formErr" hidden>Не вдалося надіслати заявку. Спробуйте ще раз або напишіть нам у Telegram: @Zavit_Ai.</div>
       </form>
     </div>
   </div>
@@ -477,7 +482,20 @@ function renderPlans(){
 }
 $('seg2').addEventListener('click',function(e){var b=e.target.closest('button');if(b){yearly=b.getAttribute('data-y')==='1';renderPlans()}});
 $('seg').addEventListener('click',function(e){var b=e.target.closest('button');if(b){pack=+b.getAttribute('data-i');renderPlans()}});
-$('form').addEventListener('submit',function(e){e.preventDefault();$('thanks').hidden=false});
+var HOOK='https://beautysalonbot.online/webhook/zavitai-lead';
+$('form').addEventListener('submit',function(e){
+  e.preventDefault();
+  var f=$('form'),btn=f.querySelector('button[type=submit]'),th=$('thanks'),er=$('formErr');
+  th.hidden=true;er.hidden=true;
+  if($('f_hp').value){th.hidden=false;return}
+  var body=new URLSearchParams({name:$('f_name').value.trim(),contact:$('f_contact').value.trim(),team:$('f_team').value,plan:$('f_plan').value,consent:'yes',source:'site'});
+  var label=btn.textContent;btn.disabled=true;btn.textContent='Надсилаємо…';
+  fetch(HOOK,{method:'POST',body:body}).then(function(r){
+    if(!r.ok)throw new Error(r.status);
+    th.hidden=false;f.reset();
+    if(window.gtag)gtag('event','generate_lead');
+  }).catch(function(){er.hidden=false}).then(function(){btn.disabled=false;btn.textContent=label});
+});
 
 $('menuBtn').addEventListener('click',function(){var o=$('mnav').classList.toggle('open');this.setAttribute('aria-expanded',o)});
 $('mnav').addEventListener('click',function(e){if(e.target.tagName==='A'){$('mnav').classList.remove('open');$('menuBtn').setAttribute('aria-expanded','false')}});
