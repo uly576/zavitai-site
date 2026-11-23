@@ -1,0 +1,1158 @@
+<title>ZavitAi — панель салону</title>
+<style>
+  /* Layout concept: fixed dark header+tabs bar, body splits into a scrollable
+     sidebar (Clients tab) or full-width content (Calendar/Winback/Settings).
+     Deliberately single dark "jewel-tone boutique" theme — carried over from
+     the approved mockup, so no light-mode branch. */
+  :root {
+    --bg: #17101c;
+    --panel: #2a1d33;
+    --panel-2: #362640;
+    --line: #4a3a54;
+    --gold-1: #e3bd6d;
+    --gold-2: #a9792f;
+    --rose: #d0949a;
+    --ink: #f6efe9;
+    --ink-dim: #b7a6bb;
+    --danger: #e08a8a;
+    --ok: #8fb3a3;
+    color-scheme: dark;
+  }
+  @font-face { font-family:'Fraunces'; font-display:swap; src:local('Fraunces'); }
+  html, body { height: 100%; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: linear-gradient(160deg, var(--bg) 0%, #1a1420 60%, #150e19 100%);
+    color: var(--ink);
+    font-family: 'Manrope', sans-serif;
+  }
+  #root { min-height: 100%; display: flex; flex-direction: column; }
+
+  a { color: var(--gold-1); }
+
+  .app { display: flex; flex-direction: column; min-height: 100%; }
+
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between; gap: 14px;
+    padding: 16px 26px; padding-top: calc(16px + env(safe-area-inset-top, 0px));
+    background: linear-gradient(90deg, #211628, #29192f);
+    border-bottom: 1px solid var(--line);
+    flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand .mark {
+    width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--gold-1), var(--gold-2));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif; font-weight: 700; color: #241923; font-size: 17px;
+  }
+  .brand h1 { font-family: 'Fraunces', serif; font-weight: 700; font-size: 21px; margin: 0; }
+  .brand .sub { color: var(--ink-dim); font-size: 12px; margin-top: 1px; }
+
+  .tabs { display: flex; gap: 4px; background: rgba(0,0,0,0.22); padding: 5px; border-radius: 10px; border: 1px solid var(--line); flex-wrap: wrap; }
+  .tab {
+    position: relative; display: flex; align-items: center; gap: 6px;
+    background: transparent; border: none; color: var(--ink-dim);
+    padding: 8px 14px; border-radius: 7px; font-size: 12.5px; font-weight: 700;
+    cursor: pointer; font-family: 'Manrope', sans-serif; white-space: nowrap;
+  }
+  .tab.active { background: linear-gradient(135deg, var(--gold-1), var(--gold-2)); color: #241923; }
+  .tab .count { background: var(--rose); color: #241923; font-size: 10px; font-weight: 800; border-radius: 20px; padding: 1px 6px; margin-left: 2px; }
+
+  .content { flex: 1; display: flex; min-height: 0; }
+  .main { flex: 1; padding: 22px; overflow-y: auto; min-width: 0; }
+
+  .banner { padding: 10px 14px; border-radius: 9px; font-size: 13px; margin-bottom: 16px; }
+  .banner.error { background: rgba(224,138,138,0.14); color: var(--danger); border: 1px solid rgba(224,138,138,0.35); }
+  .banner.ok { background: rgba(143,179,163,0.14); color: var(--ok); border: 1px solid rgba(143,179,163,0.35); }
+
+  .empty { color: var(--ink-dim); font-size: 13.5px; text-align: center; padding: 40px 12px; border: 1px dashed var(--line); border-radius: 12px; }
+  .loading { color: var(--ink-dim); font-size: 13px; padding: 30px 0; text-align: center; }
+
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 13px; padding: 18px 20px; margin-bottom: 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.3); }
+  .card h2 { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 700; margin: 0 0 14px; }
+
+  button { font-family: inherit; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: linear-gradient(135deg, var(--gold-1), var(--gold-2)); color: #241923;
+    border: none; border-radius: 9px; padding: 10px 16px; font-weight: 700; font-size: 13px; cursor: pointer;
+  }
+  .btn-primary:disabled { opacity: 0.55; cursor: default; }
+  .btn-secondary { background: transparent; border: 1px solid var(--line); color: var(--ink-dim); border-radius: 8px; padding: 9px 14px; font-size: 12.5px; cursor: pointer; font-weight: 600; }
+  .btn-danger { background: transparent; border: 1px solid var(--danger); color: var(--danger); border-radius: 8px; padding: 8px 12px; font-size: 12px; cursor: pointer; font-weight: 700; }
+  .icon-btn { background: transparent; border: 1px solid var(--line); color: var(--ink-dim); border-radius: 7px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+  .icon-btn:hover { color: var(--rose); border-color: var(--rose); }
+
+  input, textarea, select {
+    width: 100%; background: rgba(0,0,0,0.25); border: 1px solid var(--line); border-radius: 8px;
+    padding: 9px 11px; color: var(--ink); font-family: 'Manrope', sans-serif; font-size: 13.5px; box-sizing: border-box; resize: vertical;
+  }
+  input:focus, textarea:focus, select:focus { outline: 2px solid var(--gold-1); outline-offset: 1px; }
+  label.field-label { display: block; font-size: 11.5px; color: var(--ink-dim); margin-bottom: 5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
+
+  .toggle { position: relative; display: inline-flex; cursor: pointer; }
+  .toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .toggle-track { width: 36px; height: 20px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 20px; position: relative; transition: background 0.15s; }
+  .toggle-thumb { position: absolute; top: 1px; left: 1px; width: 16px; height: 16px; background: var(--ink-dim); border-radius: 50%; transition: transform 0.15s, background 0.15s; }
+  .toggle input:checked + .toggle-track { background: linear-gradient(135deg, var(--gold-1), var(--gold-2)); border-color: var(--gold-1); }
+  .toggle input:checked + .toggle-track .toggle-thumb { transform: translateX(16px); background: #241923; }
+
+  /* Calendar */
+  .cal-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .cal-nav { display: flex; align-items: center; gap: 10px; }
+  .cal-nav button { background: var(--panel); border: 1px solid var(--line); color: var(--ink); border-radius: 8px; width: 32px; height: 32px; cursor: pointer; font-size: 15px; }
+  .cal-title { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 700; min-width: 150px; text-align: center; }
+  .week-strip { display: flex; gap: 7px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 2px; }
+  .day-btn { flex: 1 0 44px; display: flex; flex-direction: column; align-items: center; gap: 2px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 9px 0; cursor: pointer; color: var(--ink-dim); }
+  .day-btn .wd { font-size: 10.5px; }
+  .day-btn .num { font-size: 15px; font-weight: 800; color: var(--ink); font-family: 'Fraunces', serif; }
+  .day-btn.active { background: linear-gradient(135deg, var(--gold-1), var(--gold-2)); border-color: var(--gold-1); }
+  .day-btn.active .num, .day-btn.active .wd { color: #241923; }
+
+  .booking { display: flex; gap: 12px; padding: 13px 15px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 9px; align-items: center; cursor: pointer; transition: border-color .15s; }
+  .booking:hover { border-color: var(--gold-1); }
+  .booking-time { display: flex; flex-direction: column; align-items: center; min-width: 54px; }
+  .booking-time .t { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 700; }
+  .booking-time .dur { font-size: 10.5px; color: var(--ink-dim); }
+  .booking-line { width: 1px; align-self: stretch; background: var(--line); }
+  .booking-info { flex: 1; min-width: 0; }
+  .booking-client { font-size: 14px; font-weight: 700; overflow-wrap: anywhere; }
+  .booking-service { font-size: 12.5px; color: var(--ink-dim); margin-top: 1px; overflow-wrap: anywhere; }
+  .badge { font-size: 10.5px; padding: 4px 9px; border-radius: 20px; white-space: nowrap; font-weight: 700; }
+  .badge.bot { background: rgba(227,189,109,0.16); color: var(--gold-1); }
+  .badge.manual { background: rgba(208,148,154,0.16); color: var(--rose); }
+  .badge.completed { background: rgba(143,179,163,0.16); color: var(--ok); }
+  .badge.cancelled { background: rgba(224,138,138,0.16); color: var(--danger); }
+
+  .staff-columns { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 8px; }
+  .staff-column { flex: 0 0 240px; min-width: 240px; }
+  .staff-col-head { display: flex; align-items: center; gap: 8px; font-family: 'Fraunces', serif; font-size: 14px; font-weight: 700; padding-bottom: 9px; margin-bottom: 11px; border-bottom: 2px solid; }
+  .staff-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+
+  /* Clients */
+  .clients-layout { display: flex; gap: 0; flex: 1; min-height: 0; width: 100%; }
+  .sidebar { width: 270px; flex-shrink: 0; border-right: 1px solid var(--line); display: flex; flex-direction: column; }
+  .search-box { margin: 4px 16px 12px; display: flex; align-items: center; gap: 8px; background: var(--panel); border: 1px solid var(--line); border-radius: 9px; padding: 9px 11px; }
+  .search-box input { background: transparent; border: none; padding: 0; }
+  .client-list { overflow-y: auto; flex: 1; padding: 0 8px; }
+  .client-item { width: 100%; text-align: left; background: transparent; border: none; border-radius: 9px; padding: 10px 11px; cursor: pointer; color: var(--ink); margin-bottom: 3px; }
+  .client-item:hover { background: var(--panel); }
+  .client-item.active { background: var(--panel-2); box-shadow: inset 2px 0 0 var(--gold-1); }
+  .client-item .name { font-size: 14px; font-weight: 700; }
+  .client-item .meta { font-size: 11.5px; color: var(--ink-dim); margin-top: 2px; }
+  .add-client-btn { margin: 10px 16px 16px; display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px dashed var(--line); border-radius: 9px; padding: 9px; background: transparent; color: var(--ink-dim); font-size: 12.5px; cursor: pointer; font-weight: 600; }
+  .add-client-btn:hover { color: var(--gold-1); border-color: var(--gold-1); }
+
+  .client-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  .client-head h2 { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 700; margin: 0 0 5px; }
+  .phone-line { display: flex; align-items: center; gap: 6px; color: var(--ink-dim); font-size: 13px; }
+
+  .visit { padding: 15px 17px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 12px; }
+  .visit-date { font-size: 12px; color: var(--rose); font-weight: 700; margin-bottom: 6px; }
+  .visit-service { font-size: 15.5px; font-weight: 700; font-family: 'Fraunces', serif; margin-bottom: 6px; }
+  .visit-desc { font-size: 13px; color: var(--ink-dim); line-height: 1.55; margin-bottom: 9px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { font-size: 11px; padding: 4px 9px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 20px; color: var(--ink); }
+  .tag.removable { display: inline-flex; align-items: center; gap: 5px; }
+  .tag.removable button { background: none; border: none; color: var(--ink-dim); cursor: pointer; padding: 0; display: flex; }
+
+  /* Winback */
+  .wb-card { display: flex; align-items: center; gap: 16px; padding: 16px 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 13px; margin-bottom: 12px; flex-wrap: wrap; }
+  .wb-avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--rose), #8f5a63); display: flex; align-items: center; justify-content: center; font-family: 'Fraunces', serif; font-weight: 700; font-size: 15px; color: #241923; flex-shrink: 0; }
+  .wb-body { flex: 1; min-width: 160px; }
+  .wb-name { font-size: 14.5px; font-weight: 700; font-family: 'Fraunces', serif; }
+  .wb-meta { font-size: 12px; color: var(--rose); font-weight: 700; margin-top: 2px; }
+
+  /* Settings */
+  .row2 { display: flex; gap: 10px; flex-wrap: wrap; }
+  .row2 > .field { flex: 1; min-width: 140px; }
+  .field { margin-bottom: 12px; }
+  .table-row { display: grid; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .table-head-row { font-size: 10.5px; color: var(--ink-dim); font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
+  .hours-row { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .hours-row:last-of-type { border-bottom: none; }
+  .day-label { font-size: 13px; font-weight: 600; width: 100px; }
+  .hours-inputs { display: flex; align-items: center; gap: 7px; color: var(--ink-dim); }
+  .hours-inputs input { width: 96px; padding: 7px 9px; font-size: 12.5px; }
+  .day-off-label { color: var(--ink-dim); font-size: 12px; font-style: italic; }
+
+  /* Modal */
+  .overlay { position: fixed; inset: 0; background: rgba(10, 6, 12, 0.68); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 16px; }
+  .modal { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 24px; width: 400px; max-width: 100%; max-height: 88vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+  .modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 10px; }
+  .modal-head h3 { font-family: 'Fraunces', serif; font-size: 17.5px; margin: 0; font-weight: 700; }
+  .modal button.close { background: none; border: none; color: var(--ink-dim); cursor: pointer; font-size: 18px; line-height: 1; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+  .gap-note { display: flex; align-items: center; gap: 8px; background: rgba(227,189,109,0.08); border: 1px dashed var(--gold-1); border-radius: 10px; padding: 10px 12px; margin: 10px 0 2px; font-size: 12px; color: var(--gold-1); flex-wrap: wrap; }
+  .autocomplete { position: relative; }
+  .autocomplete-list { position: absolute; z-index: 5; top: calc(100% + 4px); left: 0; right: 0; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; max-height: 160px; overflow-y: auto; }
+  .autocomplete-item { padding: 8px 11px; font-size: 13px; cursor: pointer; }
+  .autocomplete-item:hover { background: var(--panel); }
+
+  @media (max-width: 680px) {
+    .clients-layout { flex-direction: column; }
+    .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--line); max-height: 220px; }
+    .client-list { max-height: 140px; }
+    .topbar { padding: 14px 16px; padding-top: calc(14px + env(safe-area-inset-top, 0px)); }
+    .main { padding: 16px; }
+  }
+</style>
+
+<div id="root"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap">
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useMemo, useCallback } = React;
+
+const SUPABASE_URL = 'https://iofdwbfnosvqfizkucxh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_g_sg22SQEjcCLEaLs8Vm6g_iolMNgfk';
+let SALON_ID = null; // береться з акаунта після входу
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const PLAN_NAMES = { start: "Book", standard: "Grow", premium: "Profit" };
+const TEAM_NAMES = { solo: "1–2 майстри", team: "3–5 майстрів", large: "6–10 майстрів" };
+const weekdayFull = ["Понеділок", "Вівторок", "Середа", "Четвер", "П'ятниця", "Субота", "Неділя"];
+const monthsShort = ["січ", "лют", "бер", "квіт", "трав", "черв", "лип", "серп", "вер", "жовт", "лист", "груд"];
+const weekdaysShort = ["Нд", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+const staffColorPalette = ["#e3bd6d", "#d0949a", "#8fb3a3", "#8aa0c9", "#c98bbf", "#c9a45c", "#7fb8c9", "#b98bd0", "#c97a6b", "#9bc98b"];
+
+function todayIso() {
+  const d = new Date();
+  return d.toISOString().slice(0, 10);
+}
+function formatDate(iso) {
+  if (!iso) return "—";
+  const [y, m, d] = iso.split("-").map(Number);
+  return `${d} ${monthsShort[m - 1]} ${y}`;
+}
+function addDays(iso, n) {
+  const d = new Date(iso + "T00:00:00");
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+function weekdayLabel(iso) { return weekdaysShort[new Date(iso + "T00:00:00").getDay()]; }
+function dayNum(iso) { return Number(iso.split("-")[2]); }
+function weekdayFullName(iso) { return weekdayFull[(new Date(iso + "T00:00:00").getDay() + 6) % 7]; }
+function timeToMinutes(t) { if (!t) return 0; const [h, m] = t.split(":").map(Number); return h * 60 + m; }
+function minutesToTime(mins) { const h = Math.floor(mins / 60).toString().padStart(2, "0"); const m = (mins % 60).toString().padStart(2, "0"); return `${h}:${m}`; }
+function hhmm(t) { return t ? t.slice(0, 5) : "—"; }
+function daysSince(iso) { const a = new Date(iso + "T00:00:00"); const b = new Date(todayIso() + "T00:00:00"); return Math.round((b - a) / 86400000); }
+function initialsOf(name) { return (name || "?").split(" ").map(p => p[0]).filter(Boolean).join("").slice(0, 2).toUpperCase(); }
+
+function useSupabaseData(reloadKey) {
+  const [state, setState] = useState({ loading: true, error: null, salon: null, settings: null, services: [], staff: [], bookings: [], clients: [], winback: [] });
+
+  const load = useCallback(async () => {
+    setState(s => ({ ...s, loading: true, error: null }));
+    try {
+      const [salonRes, settingsRes, servicesRes, staffRes, bookingsRes, clientsRes, winbackRes] = await Promise.all([
+        sb.from('salons').select('*').eq('id', SALON_ID).maybeSingle(),
+        sb.from('salon_settings').select('*').eq('salon_id', SALON_ID).maybeSingle(),
+        sb.from('services').select('*').eq('salon_id', SALON_ID).order('name'),
+        sb.from('staff').select('*').eq('salon_id', SALON_ID).order('created_at'),
+        sb.from('bookings').select('*').eq('salon_id', SALON_ID).order('date').order('time'),
+        sb.from('clients').select('*').eq('salon_id', SALON_ID).order('name'),
+        sb.from('client_last_visit').select('*').eq('salon_id', SALON_ID),
+      ]);
+      const firstErr = [salonRes, settingsRes, servicesRes, staffRes, bookingsRes, clientsRes, winbackRes].find(r => r.error);
+      if (firstErr) throw firstErr.error;
+      setState({
+        loading: false, error: null,
+        salon: salonRes.data,
+        settings: settingsRes.data,
+        services: servicesRes.data || [],
+        staff: staffRes.data || [],
+        bookings: bookingsRes.data || [],
+        clients: clientsRes.data || [],
+        winback: winbackRes.data || [],
+      });
+    } catch (e) {
+      setState(s => ({ ...s, loading: false, error: e.message || String(e) }));
+    }
+  }, []);
+
+  useEffect(() => { load(); }, [load, reloadKey]);
+  return { ...state, reload: load };
+}
+
+function Toggle({ checked, onChange }) {
+  return (
+    <label className="toggle">
+      <input type="checkbox" checked={checked} onChange={onChange} />
+      <span className="toggle-track"><span className="toggle-thumb" /></span>
+    </label>
+  );
+}
+
+function Banner({ error, ok, onClear }) {
+  if (!error && !ok) return null;
+  return <div className={"banner " + (error ? "error" : "ok")} onClick={onClear} style={{ cursor: "pointer" }}>
+    {error ? ("Помилка: " + error) : ok} {" "}<span style={{ opacity: 0.6 }}>(натисніть, щоб приховати)</span>
+  </div>;
+}
+
+function ClientAutocomplete({ clients, value, onChange, onPick }) {
+  const [open, setOpen] = useState(false);
+  const matches = useMemo(() => {
+    if (!value || value.length < 1) return [];
+    const q = value.toLowerCase();
+    return clients.filter(c => (c.name || "").toLowerCase().includes(q)).slice(0, 6);
+  }, [value, clients]);
+  return (
+    <div className="autocomplete">
+      <input
+        value={value}
+        placeholder="Ім'я клієнтки"
+        onChange={e => { onChange(e.target.value); setOpen(true); }}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setTimeout(() => setOpen(false), 150)}
+      />
+      {open && matches.length > 0 && (
+        <div className="autocomplete-list">
+          {matches.map(c => (
+            <div key={c.id} className="autocomplete-item" onMouseDown={() => { onPick(c); setOpen(false); }}>
+              {c.name}{c.phone ? " · " + c.phone : ""}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CalendarView({ data, notify }) {
+  const { services, staff, bookings, clients } = data;
+  const [selectedDate, setSelectedDate] = useState(todayIso());
+  const [showBookingForm, setShowBookingForm] = useState(false);
+  const [detailId, setDetailId] = useState(null);
+  const [detailDuration, setDetailDuration] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const activeStaff = staff.filter(s => s.active !== false);
+  const soloMode = activeStaff.length <= 1;
+
+  const weekStrip = Array.from({ length: 7 }, (_, i) => addDays(selectedDate, i - 2));
+  const dayBookings = bookings
+    .filter(b => b.date === selectedDate)
+    .sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time));
+
+  function enrich(b) {
+    const client = clients.find(c => c.id === b.client_id);
+    const service = services.find(s => s.id === b.service_id);
+    return { ...b, clientName: client ? client.name : "Клієнт(ка)", serviceName: service ? service.name : "—" };
+  }
+
+  async function updateDuration(bookingId, minutes) {
+    setSaving(true);
+    const { error } = await sb.from('bookings').update({ duration_minutes: Number(minutes) }).eq('id', bookingId);
+    setSaving(false);
+    if (error) return notify(error.message, true);
+    notify("Тривалість оновлено");
+    data.reload();
+  }
+
+  const detailBooking = detailId ? enrich(dayBookings.find(b => b.id === detailId) || {}) : null;
+
+  return (
+    <div className="main">
+      <div className="cal-toolbar">
+        <div className="cal-nav">
+          <button onClick={() => setSelectedDate(addDays(selectedDate, -1))}>‹</button>
+          <div className="cal-title">{formatDate(selectedDate)}</div>
+          <button onClick={() => setSelectedDate(addDays(selectedDate, 1))}>›</button>
+        </div>
+        <button className="btn-primary" onClick={() => setShowBookingForm(true)}>+ Запис вручну</button>
+      </div>
+
+      <div className="week-strip">
+        {weekStrip.map(d => (
+          <button key={d} className={"day-btn" + (d === selectedDate ? " active" : "")} onClick={() => setSelectedDate(d)}>
+            <span className="wd">{weekdayLabel(d)}</span>
+            <span className="num">{dayNum(d)}</span>
+          </button>
+        ))}
+      </div>
+
+      {soloMode ? (
+        <>
+          {dayBookings.length === 0 && <div className="empty">На цей день ще немає записів.</div>}
+          {dayBookings.map(b => {
+            const e = enrich(b);
+            return (
+              <div className="booking" key={b.id} onClick={() => { setDetailId(b.id); setDetailDuration(String(b.duration_minutes || 60)); }}>
+                <div className="booking-time"><span className="t">{hhmm(b.time)}</span><span className="dur">{b.duration_minutes} хв</span></div>
+                <div className="booking-line" />
+                <div className="booking-info"><div className="booking-client">{e.clientName}</div><div className="booking-service">{e.serviceName}</div></div>
+                <span className={"badge " + (b.source || "manual")}>{b.source === "bot" ? "від бота" : "вручну"}</span>
+              </div>
+            );
+          })}
+        </>
+      ) : (
+        <div className="staff-columns">
+          {activeStaff.map(s => {
+            const staffBookings = dayBookings.filter(b => b.staff_id === s.id);
+            return (
+              <div className="staff-column" key={s.id}>
+                <div className="staff-col-head" style={{ borderColor: s.color || "var(--gold-1)" }}>
+                  <span className="staff-dot" style={{ background: s.color || "var(--gold-1)" }} />{s.name}
+                </div>
+                {staffBookings.length === 0 && <div className="empty" style={{ padding: "18px 0" }}>Немає записів</div>}
+                {staffBookings.map(b => {
+                  const e = enrich(b);
+                  return (
+                    <div className="booking" key={b.id} style={{ borderLeft: "3px solid " + (s.color || "var(--gold-1)") }} onClick={() => { setDetailId(b.id); setDetailDuration(String(b.duration_minutes || 60)); }}>
+                      <div className="booking-time"><span className="t">{hhmm(b.time)}</span><span className="dur">{b.duration_minutes} хв</span></div>
+                      <div className="booking-info"><div className="booking-client">{e.clientName}</div><div className="booking-service">{e.serviceName}</div></div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {detailBooking && (() => {
+        const sameGroup = dayBookings.filter(b => soloMode || b.staff_id === detailBooking.staff_id).sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time));
+        const idx = sameGroup.findIndex(b => b.id === detailBooking.id);
+        const next = sameGroup[idx + 1];
+        const currentEnd = timeToMinutes(detailBooking.time) + (Number(detailDuration) || detailBooking.duration_minutes);
+        const gapMinutes = next ? timeToMinutes(next.time) - currentEnd : null;
+        return (
+          <div className="overlay" onClick={() => setDetailId(null)}>
+            <div className="modal" onClick={e => e.stopPropagation()}>
+              <div className="modal-head"><h3>{detailBooking.clientName}</h3><button className="close" onClick={() => setDetailId(null)}>✕</button></div>
+              <div className="field"><label className="field-label">Послуга</label><input value={detailBooking.serviceName} disabled /></div>
+              <div className="row2">
+                <div className="field"><label className="field-label">Час</label><input value={hhmm(detailBooking.time)} disabled /></div>
+                <div className="field"><label className="field-label">Тривалість, хв</label><input type="number" step="5" value={detailDuration} onChange={e => setDetailDuration(e.target.value)} /></div>
+              </div>
+              <div className="modal-actions">
+                <button className="btn-secondary" onClick={() => setDetailDuration(String(detailBooking.duration_minutes))}>Скинути</button>
+                <button className="btn-primary" disabled={saving} onClick={() => updateDuration(detailBooking.id, detailDuration)}>Зберегти</button>
+              </div>
+              {next ? (
+                gapMinutes > 0 ? (
+                  <div className="gap-note">Вільно {gapMinutes} хв до "{enrich(next).clientName}" ({hhmm(next.time)})</div>
+                ) : (
+                  <div className="gap-note" style={{ borderColor: "var(--line)", color: "var(--ink-dim)" }}>Проміжку немає — впритул до наступного запису</div>
+                )
+              ) : (
+                <div className="gap-note">Далі вільно до кінця робочого дня</div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
+
+      {showBookingForm && (
+        <ManualBookingModal
+          selectedDate={selectedDate}
+          services={services}
+          staff={activeStaff}
+          soloMode={soloMode}
+          clients={clients}
+          onClose={() => setShowBookingForm(false)}
+          onSaved={() => { setShowBookingForm(false); notify("Запис додано"); data.reload(); }}
+          notify={notify}
+        />
+      )}
+    </div>
+  );
+}
+
+function ManualBookingModal({ selectedDate, services, staff, soloMode, clients, onClose, onSaved, notify }) {
+  const [clientName, setClientName] = useState("");
+  const [clientId, setClientId] = useState(null);
+  const [serviceId, setServiceId] = useState(services[0] ? services[0].id : "");
+  const [staffId, setStaffId] = useState(staff[0] ? staff[0].id : "");
+  const [time, setTime] = useState("10:00");
+  const [duration, setDuration] = useState(services[0] ? String(services[0].duration_minutes) : "60");
+  const [saving, setSaving] = useState(false);
+
+  function onServiceChange(id) {
+    setServiceId(id);
+    const svc = services.find(s => s.id === id);
+    if (svc) setDuration(String(svc.duration_minutes));
+  }
+
+  async function save() {
+    if (!clientName.trim() || !serviceId || !time) { notify("Заповніть ім'я, послугу і час", true); return; }
+    setSaving(true);
+    let finalClientId = clientId;
+    if (!finalClientId) {
+      const { data: created, error } = await sb.from('clients').insert({ salon_id: SALON_ID, name: clientName.trim() }).select().single();
+      if (error) { setSaving(false); notify(error.message, true); return; }
+      finalClientId = created.id;
+    }
+    const { error: bErr } = await sb.from('bookings').insert({
+      salon_id: SALON_ID,
+      client_id: finalClientId,
+      service_id: serviceId,
+      staff_id: soloMode ? (staff[0] ? staff[0].id : null) : staffId,
+      date: selectedDate,
+      time: time.length === 5 ? time + ":00" : time,
+      duration_minutes: Number(duration) || 60,
+      status: 'scheduled',
+      source: 'manual',
+    });
+    setSaving(false);
+    if (bErr) return notify(bErr.message, true);
+    onSaved();
+  }
+
+  return (
+    <div className="overlay" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-head"><h3>Запис вручну — {formatDate(selectedDate)}</h3><button className="close" onClick={onClose}>✕</button></div>
+        <div className="field">
+          <label className="field-label">Клієнтка</label>
+          <ClientAutocomplete clients={clients} value={clientName} onChange={v => { setClientName(v); setClientId(null); }} onPick={c => { setClientName(c.name); setClientId(c.id); }} />
+        </div>
+        <div className="field">
+          <label className="field-label">Послуга</label>
+          <select value={serviceId} onChange={e => onServiceChange(e.target.value)}>
+            {services.map(s => <option key={s.id} value={s.id}>{s.name} ({s.duration_minutes} хв)</option>)}
+          </select>
+        </div>
+        {!soloMode && staff.length > 0 && (
+          <div className="field">
+            <label className="field-label">Майстер</label>
+            <select value={staffId} onChange={e => setStaffId(e.target.value)}>
+              {staff.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+          </div>
+        )}
+        <div className="row2">
+          <div className="field"><label className="field-label">Час</label><input type="time" value={time} onChange={e => setTime(e.target.value)} /></div>
+          <div className="field"><label className="field-label">Тривалість, хв</label><input type="number" step="5" value={duration} onChange={e => setDuration(e.target.value)} /></div>
+        </div>
+        <div className="modal-actions">
+          <button className="btn-secondary" onClick={onClose}>Скасувати</button>
+          <button className="btn-primary" disabled={saving} onClick={save}>{saving ? "Зберігаю…" : "Додати в розклад"}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function NewVisitModal({ client, services, onClose, onSaved, notify }) {
+  const [date, setDate] = useState(todayIso());
+  const [time, setTime] = useState("14:00");
+  const [serviceId, setServiceId] = useState(services[0] ? services[0].id : "");
+  const [description, setDescription] = useState("");
+  const [materials, setMaterials] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  async function save() {
+    if (!serviceId || !date) { notify("Оберіть послугу і дату", true); return; }
+    setSaving(true);
+    const svc = services.find(s => s.id === serviceId);
+    const { data: booking, error: bErr } = await sb.from('bookings').insert({
+      salon_id: SALON_ID,
+      client_id: client.id,
+      service_id: serviceId,
+      date,
+      time: time.length === 5 ? time + ":00" : time,
+      duration_minutes: svc ? svc.duration_minutes : 60,
+      status: 'completed',
+      source: 'manual',
+    }).select().single();
+    if (bErr) { setSaving(false); return notify(bErr.message, true); }
+    if (description.trim() || materials.trim()) {
+      const materialsArr = materials.split(",").map(m => m.trim()).filter(Boolean);
+      const { error: vErr } = await sb.from('visit_records').insert({
+        booking_id: booking.id,
+        description: description.trim() || null,
+        materials: materialsArr.length ? materialsArr : null,
+      });
+      if (vErr) { setSaving(false); return notify(vErr.message, true); }
+    }
+    setSaving(false);
+    onSaved();
+  }
+
+  return (
+    <div className="overlay" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-head"><h3>Новий запис візиту</h3><button className="close" onClick={onClose}>✕</button></div>
+        <div className="row2">
+          <div className="field"><label className="field-label">Дата</label><input type="date" value={date} onChange={e => setDate(e.target.value)} /></div>
+          <div className="field"><label className="field-label">Час</label><input type="time" value={time} onChange={e => setTime(e.target.value)} /></div>
+        </div>
+        <div className="field">
+          <label className="field-label">Послуга</label>
+          <select value={serviceId} onChange={e => setServiceId(e.target.value)}>
+            {services.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+          </select>
+        </div>
+        <div className="field"><label className="field-label">Опис процедури</label><textarea rows={3} placeholder="Деталі виконаної роботи…" value={description} onChange={e => setDescription(e.target.value)} /></div>
+        <div className="field"><label className="field-label">Матеріали (через кому)</label><input placeholder="напр. Wella 8/1, Оксид 6%" value={materials} onChange={e => setMaterials(e.target.value)} /></div>
+        <div className="modal-actions">
+          <button className="btn-secondary" onClick={onClose}>Скасувати</button>
+          <button className="btn-primary" disabled={saving} onClick={save}>{saving ? "Зберігаю…" : "Зберегти запис"}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ClientsView({ data, notify }) {
+  const { clients, bookings, services } = data;
+  const [query, setQuery] = useState("");
+  const [selectedId, setSelectedId] = useState(null);
+  const [showNewClient, setShowNewClient] = useState(false);
+  const [showNewVisit, setShowNewVisit] = useState(false);
+  const [newClientName, setNewClientName] = useState("");
+  const [newClientPhone, setNewClientPhone] = useState("");
+  const [visitRecords, setVisitRecords] = useState({});
+  const [saving, setSaving] = useState(false);
+
+  const filtered = clients.filter(c => (c.name || "").toLowerCase().includes(query.toLowerCase()));
+  const selected = clients.find(c => c.id === selectedId) || filtered[0] || null;
+
+  const clientVisits = useMemo(() => {
+    if (!selected) return [];
+    return bookings
+      .filter(b => b.client_id === selected.id)
+      .map(b => ({ ...b, serviceName: (services.find(s => s.id === b.service_id) || {}).name || "—" }))
+      .sort((a, b) => (a.date + a.time < b.date + b.time ? 1 : -1));
+  }, [selected, bookings, services]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadRecords() {
+      if (!clientVisits.length) return;
+      const ids = clientVisits.map(v => v.id);
+      const { data: rec, error } = await sb.from('visit_records').select('*').in('booking_id', ids);
+      if (!cancelled && !error) {
+        const map = {};
+        (rec || []).forEach(r => { map[r.booking_id] = r; });
+        setVisitRecords(map);
+      }
+    }
+    loadRecords();
+    return () => { cancelled = true; };
+  }, [clientVisits]);
+
+  async function addClient() {
+    if (!newClientName.trim()) return;
+    setSaving(true);
+    const { data: created, error } = await sb.from('clients').insert({ salon_id: SALON_ID, name: newClientName.trim(), phone: newClientPhone.trim() || null }).select().single();
+    setSaving(false);
+    if (error) return notify(error.message, true);
+    setNewClientName(""); setNewClientPhone(""); setShowNewClient(false);
+    setSelectedId(created.id);
+    notify("Клієнтку додано");
+    data.reload();
+  }
+
+  return (
+    <div className="clients-layout">
+      <div className="sidebar">
+        <div className="search-box"><span>🔍</span><input placeholder="Пошук клієнтки…" value={query} onChange={e => setQuery(e.target.value)} /></div>
+        <div className="client-list">
+          {filtered.map(c => (
+            <button key={c.id} className={"client-item" + (selected && c.id === selected.id ? " active" : "")} onClick={() => setSelectedId(c.id)}>
+              <div className="name">{c.name}</div>
+              <div className="meta">{bookings.filter(b => b.client_id === c.id).length} візит(ів)</div>
+            </button>
+          ))}
+          {filtered.length === 0 && <div className="empty" style={{ margin: 10 }}>Нікого не знайдено</div>}
+        </div>
+        <button className="add-client-btn" onClick={() => setShowNewClient(true)}>+ Нова клієнтка</button>
+      </div>
+
+      <div className="main">
+        {selected ? (
+          <>
+            <div className="client-head">
+              <div>
+                <h2>{selected.name}</h2>
+                {selected.phone && <div className="phone-line">📞 {selected.phone}</div>}
+              </div>
+              <button className="btn-primary" onClick={() => setShowNewVisit(true)}>+ Новий запис</button>
+            </div>
+            {clientVisits.length === 0 && <div className="empty">Ще немає записів про візити цієї клієнтки.</div>}
+            {clientVisits.map(v => {
+              const rec = visitRecords[v.id];
+              return (
+                <div className="visit" key={v.id}>
+                  <div className="visit-date">{formatDate(v.date)}{v.time ? " · " + hhmm(v.time) : ""}</div>
+                  <div className="visit-service">{v.serviceName}</div>
+                  {rec && rec.description && <div className="visit-desc">{rec.description}</div>}
+                  {rec && rec.materials && rec.materials.length > 0 && (
+                    <div className="tags">{rec.materials.map((m, i) => <span className="tag" key={i}>{m}</span>)}</div>
+                  )}
+                </div>
+              );
+            })}
+          </>
+        ) : <div className="empty">Немає клієнток. Додайте першу.</div>}
+      </div>
+
+      {showNewClient && (
+        <div className="overlay" onClick={() => setShowNewClient(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-head"><h3>Нова клієнтка</h3><button className="close" onClick={() => setShowNewClient(false)}>✕</button></div>
+            <div className="field"><label className="field-label">Ім'я</label><input value={newClientName} onChange={e => setNewClientName(e.target.value)} /></div>
+            <div className="field"><label className="field-label">Телефон</label><input placeholder="+380…" value={newClientPhone} onChange={e => setNewClientPhone(e.target.value)} /></div>
+            <div className="modal-actions">
+              <button className="btn-secondary" onClick={() => setShowNewClient(false)}>Скасувати</button>
+              <button className="btn-primary" disabled={saving} onClick={addClient}>Додати</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showNewVisit && selected && (
+        <NewVisitModal client={selected} services={services} onClose={() => setShowNewVisit(false)} onSaved={() => { setShowNewVisit(false); notify("Візит додано"); data.reload(); }} notify={notify} />
+      )}
+    </div>
+  );
+}
+
+function WinbackView({ data, notify }) {
+  const { winback, clients } = data;
+  const [sentIds, setSentIds] = useState({});
+
+  const candidates = winback
+    .filter(w => w.last_visit_date && daysSince(w.last_visit_date) >= 30)
+    .map(w => ({ ...w, client: clients.find(c => c.id === w.client_id) }))
+    .filter(w => w.client)
+    .sort((a, b) => daysSince(b.last_visit_date) - daysSince(a.last_visit_date));
+
+  async function markSent(w) {
+    const { error } = await sb.from('winback_reminders').insert({ client_id: w.client_id, status: 'sent', sent_at: new Date().toISOString() });
+    if (error) return notify(error.message, true);
+    setSentIds(s => ({ ...s, [w.client_id]: true }));
+    notify("Позначено як надіслано");
+  }
+
+  return (
+    <div className="main">
+      <div className="card" style={{ marginBottom: 18 }}>
+        <div style={{ fontSize: 13, color: "var(--ink-dim)" }}>
+          Клієнтки, які не були в салоні 30+ днів. Саму розсилку нагадувань виконує автоматичний win-back сценарій за розкладом — тут ти бачиш список і можеш позначити, кому вже написала вручну.
+        </div>
+      </div>
+      {candidates.length === 0 && <div className="empty">Наразі немає клієнток, які не були у салоні понад 30 днів.</div>}
+      {candidates.map(w => {
+        const days = daysSince(w.last_visit_date);
+        const sent = sentIds[w.client_id];
+        return (
+          <div className="wb-card" key={w.client_id}>
+            <div className="wb-avatar">{initialsOf(w.client.name)}</div>
+            <div className="wb-body">
+              <div className="wb-name">{w.client.name}</div>
+              <div className="wb-meta">{days} днів без візиту · востаннє {formatDate(w.last_visit_date)}</div>
+            </div>
+            <button className="btn-secondary" style={sent ? { color: "var(--ok)", borderColor: "var(--ok)" } : {}} disabled={sent} onClick={() => markSent(w)}>
+              {sent ? "✓ Позначено" : "Позначити надісланим"}
+            </button>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function SettingsView({ data, notify }) {
+  const { salon, settings, services, staff } = data;
+  const [salonName, setSalonName] = useState(salon ? salon.name : "");
+  const [greeting, setGreeting] = useState(settings ? settings.greeting || "" : "");
+  const [reminderTemplate, setReminderTemplate] = useState(settings ? settings.reminder_template || "" : "");
+  const [workingHours, setWorkingHours] = useState(settings ? settings.working_hours || {} : {});
+  const [buffer, setBuffer] = useState(settings ? String(settings.buffer_minutes) : "10");
+  const [daysOff, setDaysOff] = useState(settings ? settings.days_off || [] : []);
+  const [newDayOff, setNewDayOff] = useState("");
+
+  const [newService, setNewService] = useState({ name: "", duration_minutes: "30", price: "" });
+  const [newStaff, setNewStaff] = useState({ name: "", phone: "", role: "" });
+  const [savingSection, setSavingSection] = useState(null);
+
+  useEffect(() => { if (salon) setSalonName(salon.name || ""); }, [salon]);
+  useEffect(() => {
+    if (settings) {
+      setGreeting(settings.greeting || "");
+      setReminderTemplate(settings.reminder_template || "");
+      setWorkingHours(settings.working_hours || {});
+      setBuffer(String(settings.buffer_minutes));
+      setDaysOff(settings.days_off || []);
+    }
+  }, [settings]);
+
+  async function saveSalonInfo() {
+    setSavingSection("salon");
+    const { error } = await sb.from('salons').update({ name: salonName }).eq('id', SALON_ID);
+    setSavingSection(null);
+    if (error) return notify(error.message, true);
+    notify("Дані салону збережено"); data.reload();
+  }
+
+  async function saveBotTexts() {
+    setSavingSection("texts");
+    const { error } = await upsertSettings({ greeting, reminder_template: reminderTemplate });
+    setSavingSection(null);
+    if (error) return notify(error.message, true);
+    notify("Тексти бота збережено"); data.reload();
+  }
+
+  async function upsertSettings(fields) {
+    return sb.from('salon_settings').update(fields).eq('salon_id', SALON_ID);
+  }
+
+  async function saveHours() {
+    setSavingSection("hours");
+    const { error } = await upsertSettings({ working_hours: workingHours, buffer_minutes: Number(buffer) || 10 });
+    setSavingSection(null);
+    if (error) return notify(error.message, true);
+    notify("Графік роботи збережено"); data.reload();
+  }
+
+  function updateHour(day, field, value) {
+    setWorkingHours(prev => ({ ...prev, [day]: { ...(prev[day] || {}), [field]: value } }));
+  }
+
+  async function addDayOffRow() {
+    if (!newDayOff || daysOff.includes(newDayOff)) return;
+    const updated = [...daysOff, newDayOff].sort();
+    setSavingSection("daysoff");
+    const { error } = await upsertSettings({ days_off: updated });
+    setSavingSection(null);
+    if (error) return notify(error.message, true);
+    setDaysOff(updated); setNewDayOff(""); notify("Вихідний додано");
+  }
+  async function removeDayOffRow(d) {
+    const updated = daysOff.filter(x => x !== d);
+    setSavingSection("daysoff");
+    const { error } = await upsertSettings({ days_off: updated });
+    setSavingSection(null);
+    if (error) return notify(error.message, true);
+    setDaysOff(updated);
+  }
+
+  async function addService() {
+    if (!newService.name.trim()) return;
+    setSavingSection("services");
+    const { error } = await sb.from('services').insert({
+      salon_id: SALON_ID, name: newService.name.trim(),
+      duration_minutes: Number(newService.duration_minutes) || 30,
+      price: Number(newService.price) || 0, is_active: true,
+    });
+    setSavingSection(null);
+    if (error) return notify(error.message, true);
+    setNewService({ name: "", duration_minutes: "30", price: "" });
+    notify("Послугу додано"); data.reload();
+  }
+  async function updateService(id, field, value) {
+    const { error } = await sb.from('services').update({ [field]: value }).eq('id', id);
+    if (error) return notify(error.message, true);
+    data.reload();
+  }
+  async function removeService(id) {
+    const { error } = await sb.from('services').delete().eq('id', id);
+    if (error) return notify(error.message, true);
+    notify("Послугу видалено"); data.reload();
+  }
+
+  async function addStaffMember() {
+    if (!newStaff.name.trim() || staff.length >= 10) return;
+    const used = staff.map(s => s.color);
+    const color = staffColorPalette.find(c => !used.includes(c)) || staffColorPalette[staff.length % staffColorPalette.length];
+    setSavingSection("staff");
+    const { error } = await sb.from('staff').insert({
+      salon_id: SALON_ID, name: newStaff.name.trim(), phone: newStaff.phone.trim() || null,
+      role: newStaff.role.trim() || "Майстер", active: true, color,
+    });
+    setSavingSection(null);
+    if (error) return notify(error.message, true);
+    setNewStaff({ name: "", phone: "", role: "" });
+    notify("Майстра додано"); data.reload();
+  }
+  async function toggleStaffActive(id, active) {
+    const { error } = await sb.from('staff').update({ active: !active }).eq('id', id);
+    if (error) return notify(error.message, true);
+    data.reload();
+  }
+  async function removeStaffMember(id) {
+    const { error } = await sb.from('staff').delete().eq('id', id);
+    if (error) return notify(error.message, true);
+    notify("Майстра видалено"); data.reload();
+  }
+
+  return (
+    <div className="main">
+      <div className="card">
+        <h2>Ваш тариф</h2>
+        <div className="row2">
+          <div className="field" style={{ marginBottom: 0 }}>
+            <label className="field-label">Тариф</label>
+            <div style={{ fontFamily: "'Fraunces', serif", fontSize: 20, fontWeight: 700 }}>{PLAN_NAMES[salon && salon.plan] || "—"}</div>
+          </div>
+          <div className="field" style={{ marginBottom: 0 }}>
+            <label className="field-label">Розмір команди</label>
+            <div style={{ fontSize: 15, fontWeight: 600, marginTop: 3 }}>{TEAM_NAMES[salon && salon.team_size] || "—"}</div>
+          </div>
+        </div>
+        <div style={{ fontSize: 12.5, color: "var(--ink-dim)", marginTop: 12 }}>Змінити тариф можна, написавши нам.</div>
+      </div>
+
+      <div className="card">
+        <h2>Дані салону для бота</h2>
+        <div className="field"><label className="field-label">Назва салону</label><input value={salonName} onChange={e => setSalonName(e.target.value)} /></div>
+        <div className="field" style={{ marginBottom: 0 }}>
+          <label className="field-label">Привітання бота</label>
+          <textarea rows={2} value={greeting} onChange={e => setGreeting(e.target.value)} />
+        </div>
+        <div className="modal-actions" style={{ marginTop: 14 }}>
+          <button className="btn-primary" disabled={savingSection === "salon"} onClick={() => { saveSalonInfo(); saveBotTexts(); }}>Зберегти</button>
+        </div>
+      </div>
+
+      <div className="card">
+        <h2>Текст win-back нагадування</h2>
+        <div className="field" style={{ marginBottom: 0 }}>
+          <label className="field-label">Шаблон повідомлення (можна лишити {"{ім'я}"})</label>
+          <textarea rows={3} value={reminderTemplate} onChange={e => setReminderTemplate(e.target.value)} />
+        </div>
+        <div className="modal-actions" style={{ marginTop: 14 }}>
+          <button className="btn-primary" disabled={savingSection === "texts"} onClick={saveBotTexts}>Зберегти</button>
+        </div>
+      </div>
+
+      <div className="card">
+        <h2>Майстри</h2>
+        {staff.map(s => (
+          <div className="table-row" key={s.id} style={{ gridTemplateColumns: "1.6fr 1.2fr 1fr 0.5fr 32px" }}>
+            <span style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13.5, fontWeight: 600 }}>
+              <span className="staff-dot" style={{ background: s.color || "var(--gold-1)" }} />{s.name}
+            </span>
+            <span style={{ fontSize: 13, color: "var(--ink-dim)" }}>{s.phone || "—"}</span>
+            <span style={{ fontSize: 13, color: "var(--ink-dim)" }}>{s.role || "—"}</span>
+            <Toggle checked={s.active !== false} onChange={() => toggleStaffActive(s.id, s.active)} />
+            <button className="icon-btn" onClick={() => removeStaffMember(s.id)}>🗑</button>
+          </div>
+        ))}
+        {staff.length < 10 ? (
+          <div className="table-row" style={{ gridTemplateColumns: "1.6fr 1.2fr 1fr 0.5fr 32px", paddingTop: 8, marginTop: 6, borderTop: "1px dashed var(--line)" }}>
+            <input placeholder="Ім'я майстра" value={newStaff.name} onChange={e => setNewStaff({ ...newStaff, name: e.target.value })} />
+            <input placeholder="Телефон" value={newStaff.phone} onChange={e => setNewStaff({ ...newStaff, phone: e.target.value })} />
+            <input placeholder="Роль" value={newStaff.role} onChange={e => setNewStaff({ ...newStaff, role: e.target.value })} />
+            <span></span>
+            <button className="icon-btn" style={{ color: "var(--gold-1)", borderColor: "var(--gold-1)" }} onClick={addStaffMember}>+</button>
+          </div>
+        ) : <div className="empty" style={{ padding: 10 }}>Досягнуто ліміту 10 майстрів.</div>}
+      </div>
+
+      <div className="card">
+        <h2>Послуги та ціни</h2>
+        <div className="table-row table-head-row" style={{ gridTemplateColumns: "2fr 1fr 1fr 0.6fr 32px" }}>
+          <span>Назва</span><span>Тривалість, хв</span><span>Ціна, ₴</span><span>Активна</span><span></span>
+        </div>
+        {services.map(s => (
+          <div className="table-row" key={s.id} style={{ gridTemplateColumns: "2fr 1fr 1fr 0.6fr 32px" }}>
+            <input defaultValue={s.name} onBlur={e => e.target.value !== s.name && updateService(s.id, 'name', e.target.value)} />
+            <input type="number" defaultValue={s.duration_minutes} onBlur={e => Number(e.target.value) !== s.duration_minutes && updateService(s.id, 'duration_minutes', Number(e.target.value))} />
+            <input type="number" defaultValue={s.price} onBlur={e => Number(e.target.value) !== Number(s.price) && updateService(s.id, 'price', Number(e.target.value))} />
+            <Toggle checked={s.is_active !== false} onChange={() => updateService(s.id, 'is_active', !(s.is_active !== false))} />
+            <button className="icon-btn" onClick={() => removeService(s.id)}>🗑</button>
+          </div>
+        ))}
+        <div className="table-row" style={{ gridTemplateColumns: "2fr 1fr 1fr 0.6fr 32px", paddingTop: 8, marginTop: 6, borderTop: "1px dashed var(--line)" }}>
+          <input placeholder="Нова послуга" value={newService.name} onChange={e => setNewService({ ...newService, name: e.target.value })} />
+          <input type="number" placeholder="30" value={newService.duration_minutes} onChange={e => setNewService({ ...newService, duration_minutes: e.target.value })} />
+          <input type="number" placeholder="0" value={newService.price} onChange={e => setNewService({ ...newService, price: e.target.value })} />
+          <span></span>
+          <button className="icon-btn" style={{ color: "var(--gold-1)", borderColor: "var(--gold-1)" }} onClick={addService}>+</button>
+        </div>
+      </div>
+
+      <div className="card">
+        <h2>Робочий графік</h2>
+        {weekdayFull.map(day => {
+          const dh = workingHours[day] || { active: false, start: "09:00", end: "18:00" };
+          return (
+            <div className="hours-row" key={day}>
+              <Toggle checked={!!dh.active} onChange={() => updateHour(day, 'active', !dh.active)} />
+              <span className="day-label">{day}</span>
+              {dh.active ? (
+                <div className="hours-inputs">
+                  <input type="time" value={dh.start} onChange={e => updateHour(day, 'start', e.target.value)} />
+                  <span>—</span>
+                  <input type="time" value={dh.end} onChange={e => updateHour(day, 'end', e.target.value)} />
+                </div>
+              ) : <span className="day-off-label">вихідний</span>}
+            </div>
+          );
+        })}
+        <div className="hours-row" style={{ justifyContent: "space-between" }}>
+          <span style={{ fontSize: 13.5, fontWeight: 600 }}>Буфер між записами, хв</span>
+          <input type="number" step="5" value={buffer} onChange={e => setBuffer(e.target.value)} style={{ width: 80 }} />
+        </div>
+        <div className="modal-actions" style={{ marginTop: 14 }}>
+          <button className="btn-primary" disabled={savingSection === "hours"} onClick={saveHours}>Зберегти графік</button>
+        </div>
+      </div>
+
+      <div className="card">
+        <h2>Вихідні та відпустка</h2>
+        <div className="tags" style={{ marginBottom: 14 }}>
+          {daysOff.map(d => (
+            <span className="tag removable" key={d}>{formatDate(d)}<button onClick={() => removeDayOffRow(d)}>✕</button></span>
+          ))}
+          {daysOff.length === 0 && <span style={{ fontSize: 12.5, color: "var(--ink-dim)", fontStyle: "italic" }}>Немає запланованих вихідних</span>}
+        </div>
+        <div className="row2">
+          <div className="field" style={{ marginBottom: 0 }}><input type="date" value={newDayOff} onChange={e => setNewDayOff(e.target.value)} /></div>
+          <button className="btn-primary" onClick={addDayOffRow}>Додати дату</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Dashboard({ onLogout }) {
+  const [reloadKey, setReloadKey] = useState(0);
+  const data = useSupabaseData(reloadKey);
+  const fullData = { ...data, reload: () => setReloadKey(k => k + 1) };
+  const [tab, setTab] = useState("calendar");
+  const [message, setMessage] = useState({ text: null, error: false });
+
+  const notify = useCallback((text, error) => {
+    setMessage({ text, error: !!error });
+    if (!error) setTimeout(() => setMessage(m => (m.text === text ? { text: null, error: false } : m)), 4000);
+  }, []);
+
+  const winbackCount = (data.winback || []).filter(w => w.last_visit_date && daysSince(w.last_visit_date) >= 30).length;
+
+  const tabs = [
+    { id: "calendar", label: "Календар" },
+    { id: "clients", label: "Клієнти" },
+    { id: "winback", label: "Нагадування", count: winbackCount },
+    { id: "settings", label: "Налаштування" },
+  ];
+
+  return (
+    <div className="app">
+      <div className="topbar">
+        <div className="brand">
+          <div className="mark">Z</div>
+          <div>
+            <h1>ZavitAi</h1>
+            <div className="sub">{data.salon ? data.salon.name : "Панель салону"}</div>
+          </div>
+        </div>
+        <div className="tabs">
+          {tabs.map(t => (
+            <button key={t.id} className={"tab" + (tab === t.id ? " active" : "")} onClick={() => setTab(t.id)}>
+              {t.label}{t.count > 0 && <span className="count">{t.count}</span>}
+            </button>
+          ))}
+        </div>
+        <button className="btn-secondary" onClick={onLogout}>Вийти</button>
+      </div>
+
+      <div className="content" style={{ flexDirection: "column" }}>
+        {(message.text) && (
+          <div style={{ padding: "0 22px" }}>
+            <Banner error={message.error ? message.text : null} ok={!message.error ? message.text : null} onClear={() => setMessage({ text: null, error: false })} />
+          </div>
+        )}
+        {data.loading ? (
+          <div className="loading">Завантаження даних салону…</div>
+        ) : data.error ? (
+          <div className="main"><div className="banner error">Не вдалося завантажити дані: {data.error}</div></div>
+        ) : (
+          <>
+            {tab === "calendar" && <CalendarView data={fullData} notify={notify} />}
+            {tab === "clients" && <ClientsView data={fullData} notify={notify} />}
+            {tab === "winback" && <WinbackView data={fullData} notify={notify} />}
+            {tab === "settings" && <SettingsView data={fullData} notify={notify} />}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Login({ onSignedIn }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+
+  async function submit(e) {
+    e.preventDefault();
+    setBusy(true); setError(null);
+    const { data, error } = await sb.auth.signInWithPassword({ email: email.trim(), password });
+    setBusy(false);
+    if (error) return setError("Не вдалося увійти. Перевірте пошту й пароль.");
+    onSignedIn(data.session);
+  }
+
+  return (
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+      <form className="card" style={{ width: 380, maxWidth: "100%", marginBottom: 0 }} onSubmit={submit}>
+        <div className="brand" style={{ marginBottom: 18 }}>
+          <div className="mark">Z</div>
+          <div><h1>ZavitAi</h1><div className="sub">Вхід у панель салону</div></div>
+        </div>
+        {error && <div className="banner error">{error}</div>}
+        <div className="field"><label className="field-label" htmlFor="em">Пошта</label>
+          <input id="em" type="email" autoComplete="username" required value={email} onChange={e => setEmail(e.target.value)} /></div>
+        <div className="field"><label className="field-label" htmlFor="pw">Пароль</label>
+          <input id="pw" type="password" autoComplete="current-password" required value={password} onChange={e => setPassword(e.target.value)} /></div>
+        <button className="btn-primary" style={{ width: "100%", justifyContent: "center" }} disabled={busy}>{busy ? "Входжу…" : "Увійти"}</button>
+      </form>
+    </div>
+  );
+}
+
+function AuthGate() {
+  const [state, setState] = useState({ status: "loading", error: null });
+
+  const resolve = useCallback(async (session) => {
+    if (!session) { SALON_ID = null; setState({ status: "out", error: null }); return; }
+    const { data, error } = await sb.from('salon_users').select('salon_id').eq('user_id', session.user.id).maybeSingle();
+    if (error || !data) { setState({ status: "noaccess", error: error ? error.message : null }); return; }
+    SALON_ID = data.salon_id;
+    setState({ status: "in", error: null });
+  }, []);
+
+  useEffect(() => {
+    sb.auth.getSession().then(({ data }) => resolve(data.session));
+    const { data: sub } = sb.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") { SALON_ID = null; setState({ status: "out", error: null }); }
+    });
+    return () => sub.subscription.unsubscribe();
+  }, [resolve]);
+
+  async function logout() { await sb.auth.signOut(); }
+
+  if (state.status === "loading") return <div className="loading">Завантаження…</div>;
+  if (state.status === "out") return <Login onSignedIn={resolve} />;
+  if (state.status === "noaccess") return (
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+      <div className="card" style={{ width: 420, maxWidth: "100%" }}>
+        <h2>Немає доступу до салону</h2>
+        <p style={{ color: "var(--ink-dim)", fontSize: 14 }}>Ваш акаунт ще не прив'язаний до салону. Зверніться до підтримки.</p>
+        {state.error && <div className="banner error">{state.error}</div>}
+        <button className="btn-secondary" onClick={logout}>Вийти</button>
+      </div>
+    </div>
+  );
+  return <Dashboard onLogout={logout} />;
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<AuthGate />);
+</script>
