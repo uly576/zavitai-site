@@ -1,0 +1,12 @@
+
+# ZavitAi
+zavitai.app, www.zavitai.app {
+	handle_path /dashboard* {
+		root * /var/www/dashboard
+		file_server
+	}
+	handle {
+		root * /var/www/site
+		file_server
+	}
+}

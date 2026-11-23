@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Політика конфіденційності — ZavitAi</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=Unbounded:wght@500;700&display=swap">
+<style>
+:root{
+  --bg:#FBF4F2; --surface:#FFFFFF; --ink:#2A1520; --muted:#765F69; --line:#EBDAD6;
+  --accent:#B4415F; --on-accent:#FFFFFF; --tint:#F7E3E8; --gold:#9A7036; --ph:#FFE9A8; --on-ph:#4A3500;
+  --font-display:'Unbounded','Manrope',system-ui,sans-serif;
+  --font-body:'Manrope',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:light;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#1B0E17; --surface:#2A1823; --ink:#F7EAEE; --muted:#BDA5AF; --line:#44293A;
+  --accent:#E9758F; --on-accent:#1B0E17; --tint:#3A2030; --gold:#D8B27A; --ph:#5A4510; --on-ph:#FFE9A8; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#1B0E17; --surface:#2A1823; --ink:#F7EAEE; --muted:#BDA5AF; --line:#44293A;
+  --accent:#E9758F; --on-accent:#1B0E17; --tint:#3A2030; --gold:#D8B27A; --ph:#5A4510; --on-ph:#FFE9A8; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.65;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+.wrap{max-width:1040px;margin:0 auto}
+h1,h2{font-family:var(--font-display);font-weight:700;line-height:1.2;text-wrap:balance;margin:0}
+h1{font-size:clamp(26px,5vw,40px);letter-spacing:-.02em}
+h2{font-size:clamp(17px,2.3vw,20px);letter-spacing:-.01em;margin-top:40px;margin-bottom:12px}
+p{margin:0 0 10px}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:800}
+.btn{display:inline-flex;align-items:center;justify-content:center;border:0;cursor:pointer;font:800 14px var(--font-body);
+  background:var(--accent);color:var(--on-accent);padding:9px 18px;border-radius:999px;text-decoration:none}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);
+  margin-inline:calc(-1*max(16px,env(safe-area-inset-left,0px)));padding-inline:max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:12px}
+.logo{font-family:var(--font-display);font-weight:700;font-size:20px;letter-spacing:-.02em;color:var(--ink);text-decoration:none;display:block}
+.logo-sub{font-size:12.5px;color:var(--muted);font-weight:600;line-height:1.3;margin-top:1px}
+.doc{max-width:760px;margin:0 auto;padding-block:clamp(32px,6vw,64px) 24px}
+.doc .meta{color:var(--muted);font-size:14px;margin-top:10px}
+.doc p b.n{color:var(--muted);font-weight:800;margin-right:6px;white-space:nowrap}
+.doc a{color:var(--accent)}
+.ph{background:var(--ph);color:var(--on-ph);padding:0 4px;border-radius:4px}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px 20px;margin:16px 0}
+.box p:last-child{margin-bottom:0}
+.note{font-size:14px;color:var(--muted)}
+.tbl{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:420px}
+th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+th{font-weight:800}
+footer{max-width:760px;margin:0 auto;padding-block:28px 56px;color:var(--muted);font-size:14px;display:flex;flex-wrap:wrap;gap:8px 24px}
+footer a{color:inherit}
+.hnav{display:flex;gap:22px;font-size:14.5px;font-weight:600}.hnav a{color:var(--ink);text-decoration:none;opacity:.8}@media (max-width:900px){.hnav{display:none}}
+.menu-btn{display:none;width:40px;height:40px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;align-items:center;justify-content:center}.hright{display:flex;align-items:center;gap:10px}.mnav{display:none;padding:4px 0 12px}.mnav a{display:block;padding:12px 4px;border-top:1px solid var(--line);color:var(--ink);text-decoration:none;font-weight:700}.mnav.open{display:block}@media (max-width:900px){.menu-btn{display:flex}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top"><div class="bar">
+  <div><a class="logo" href="./">ZavitAi</a><div class="logo-sub">AI адміністратор 24/7</div></div>
+  <nav class="hnav"><a href="./#how">Як це працює</a><a href="./#calc">Калькулятор</a><a href="./#plans">Тарифи</a><a href="./#faq">Питання</a><a href="about.html">Про ZavitAi</a></nav>
+  <div class="hright"><a class="btn" href="./#join">Підключити</a><button class="menu-btn" id="menuBtn" type="button" aria-label="Меню" aria-expanded="false" aria-controls="mnav"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
+</div><nav class="mnav" id="mnav" aria-label="Меню"><a href="./#how">Як це працює</a><a href="./#calc">Калькулятор</a><a href="./#plans">Тарифи</a><a href="./#faq">Питання</a><a href="about.html">Про ZavitAi</a></nav></header>
+<main class="doc">
+<div class="eyebrow">Документ</div>
+<h1 style="margin-top:12px">Політика конфіденційності</h1>
+<p class="meta">Редакція від 14 листопада 2026 року</p>
+<div class="box"><p>Тут пояснено, які персональні дані обробляє сервіс «ZavitAi», навіщо, з ким їх ділить і які права Ви маєте. Політика складена відповідно до Закону України «Про захист персональних даних».</p></div>
+<h2>1. Хто ми</h2>
+<p><b class="n">1.1.</b>ФОП Токман Юлія Сергіївна, ІПН 2835309242, адреса Черкаська область, Черкаський район, м. Чигирин, вул. Миру, 4в, кв. 24. Контакти: <a href="https://t.me/Zavit_Ai">@Zavit_Ai</a>, <a href="mailto:zavitaiadmin@gmail.com">zavitaiadmin@gmail.com</a>.</p>
+<p><b class="n">1.2.</b>Для даних відвідувачів сайту та осіб, які залишили заявку, ми є володільцем.</p>
+<p><b class="n">1.3.</b>Для даних Клієнтів салонів, які спілкуються з AI-адміністратором у Telegram, володільцем є відповідний салон або майстер, а ми діємо як розпорядник за договором (Додаток 1 до <a href="offer.html">публічної оферти</a>).</p>
+<h2>2. Які дані ми обробляємо</h2>
+<p><b class="n">2.1.</b><b>Заявка на підключення:</b> ім'я або назва салону, контакт (телефон чи Telegram), розмір команди, обраний тариф, відмітка про згоду.</p>
+<p><b class="n">2.2.</b><b>Салони та майстри, що користуються Сервісом:</b> ідентифікатор Telegram, налаштування послуг і цін, розклад, записи, нотатки.</p>
+<p><b class="n">2.3.</b><b>Клієнти салонів у боті:</b> ім'я та ідентифікатор Telegram, дані запису (послуга, дата, час, статус), відповіді на нагадування, тексти повідомлень до бота <mark class="ph">[телефон, якщо бот його запитує]</mark>.</p>
+<p><b class="n">2.4.</b>Ми не збираємо навмисно дані про стан здоров'я чи інші особливі категорії й просимо не вносити їх у повідомлення та нотатки.</p>
+<h2>3. Навіщо й на якій підставі</h2>
+<p><b class="n">3.1.</b>Щоб зв'язатися із заявником, підключити Сервіс, надавати його функції, підтримувати користувачів і виконувати вимоги закону.</p>
+<p><b class="n">3.2.</b>Підставою є Ваша згода та необхідність укласти й виконати договір. Для Клієнтів салонів підставою є їхня згода, яку салон отримує самостійно.</p>
+<p><b class="n">3.3.</b>Нагадування про візит і повідомлення клієнтам, які давно не були в салоні, надсилаються від імені салону й лише тим, хто дав згоду.</p>
+<h2>4. Хто отримує дані</h2>
+<p><b class="n">4.1.</b>Дані обробляють постачальники, без яких Сервіс не працює: Telegram (месенджер); Supabase (база даних, ЄС, Ірландія); DigitalOcean (сервер, Німеччина); OpenAI (США, обробка текстів повідомлень для відповідей AI-адміністратора). За Вашої згоди на сайті також Google (Google Analytics) і Microsoft (Clarity), США.</p>
+<p><b class="n">4.2.</b>Ми не продаємо дані й не використовуємо їх для реклами сторонніх компаній.</p>
+<p><b class="n">4.3.</b>Салон бачить дані своїх Клієнтів, а Клієнт іншого салону в тому самому Сервісі їх не бачить.</p>
+<h2>5. Передача за кордон</h2>
+<p><b class="n">5.1.</b>Дані зберігаються й обробляються в країнах ЄС (Ірландія, Німеччина). Для відповідей AI-адміністратора тексти повідомлень передаються до OpenAI у США.</p>
+<p><b class="n">5.2.</b>Така передача відбувається за згодою людини, яку збирає салон. Ми передаємо лише ті тексти, які потрібні для відповіді.</p>
+<h2>6. Скільки зберігаємо</h2>
+<p><b class="n">6.1.</b>Дані Замовника й Клієнтів — поки діє договір і ще 30 днів після його завершення, потім видаляємо.</p>
+<p><b class="n">6.2.</b>Заявки, що не стали підключенням, зберігаємо <mark class="ph">[12 місяців]</mark>.</p>
+<h2>7. Як захищаємо</h2>
+<p><b class="n">7.1.</b>Доступ до даних мають лише потрібні для роботи Сервісу люди й системи, з'єднання захищене шифруванням, а секретні ключі зберігаються окремо від коду. Жодна система не дає абсолютної гарантії, тому про витік, що створює ризик для Вас, ми повідомимо без невиправданої затримки.</p>
+<h2>8. Ваші права</h2>
+<p><b class="n">8.1.</b>Ви можете дізнатися, які Ваші дані ми обробляємо, отримати їх копію, вимагати виправити чи видалити, заперечити проти обробки й будь-коли відкликати згоду.</p>
+<p><b class="n">8.2.</b>Напишіть нам на <a href="mailto:zavitaiadmin@gmail.com">zavitaiadmin@gmail.com</a> або в Telegram <a href="https://t.me/Zavit_Ai">@Zavit_Ai</a>. Якщо Ви Клієнт салону, зверніться до салону, а ми допоможемо йому виконати запит.</p>
+<p><b class="n">8.3.</b>Також Ви маєте право звернутися до Уповноваженого Верховної Ради України з прав людини або до суду.</p>
+<h2>9. Клієнти салонів</h2>
+<p><b class="n">9.1.</b>Салон як володілець самостійно інформує своїх Клієнтів про обробку даних і отримує їхню згоду, зокрема на передачу текстів повідомлень до OpenAI (США). Ми допомагаємо, надаючи приклад тексту.</p>
+<p><b class="n">9.2.</b>Приклад тексту: «Щоб записати Вас, салон і сервіс ZavitAi обробляють Ваші дані: ім'я, Telegram-ідентифікатор, дані запису й повідомлення. Для відповідей на запитання тексти повідомлень можуть оброблятися AI-сервісом OpenAI (США). Докладніше в політиці конфіденційності.»</p>
+<h2>10. Cookie, аналітика й шрифти</h2>
+<p><b class="n">10.1.</b>Якщо Ви натиснули «Прийняти» у банері на сайті, ми вмикаємо аналітику Google Analytics і Microsoft Clarity. Вони допомагають бачити, скільки людей відвідує сайт, звідки вони приходять, які розділи відкривають і до якого місця сторінки гортають. Для цього ставляться cookie й збираються технічні дані: приблизний регіон за IP-адресою, тип пристрою та браузера, відкриті сторінки й дії на них, зокрема знеособлені записи дій на сторінці. Ці дані можуть оброблятися в США. <mark class="ph">[звірити, які сервіси аналітики реально підключено на сайті]</mark>.</p>
+<p><b class="n">10.2.</b>Без Вашої згоди аналітика не вмикається. Натиснувши «Відхилити», Ви відмовляєтесь від неї. Змінити рішення можна, очистивши дані сайту в налаштуваннях браузера.</p>
+<p><b class="n">10.3.</b>Cookie для реклами сайт не використовує. Для відображення шрифтів завантажуються файли з Google Fonts, тому Ваша IP-адреса передається Google.</p>
+<h2>11. Зміни</h2>
+<p><b class="n">11.1.</b>Ми можемо оновлювати політику. Нова редакція з'являється на цій сторінці з датою вгорі.</p>
+</main>
+<footer><a href="./">← На головну</a><a href="offer.html">Публічна оферта</a><a href="privacy.html">Політика конфіденційності</a><a href="about.html">Про ZavitAi</a></footer>
+</div>
+<script>var b=document.getElementById("menuBtn"),m=document.getElementById("mnav");b.onclick=function(){var o=m.classList.toggle("open");b.setAttribute("aria-expanded",o)};</script>
+</body>
+</html>

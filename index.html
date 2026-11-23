@@ -1,0 +1,517 @@
+<title>ZavitAi — AI-адміністратор у Telegram</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=Unbounded:wght@500;700&display=swap">
+<style>
+/* Layout: one scrolling story: problem, solution, how it works, calculator, tariffs, join. Plum-noir ink on blush porcelain; palette shifts by sphere. */
+:root{
+  --bg:#FBF4F2; --surface:#FFFFFF; --ink:#2A1520; --muted:#765F69; --line:#EBDAD6;
+  --accent:#B4415F; --on-accent:#FFFFFF; --tint:#F7E3E8; --gold:#9A7036; --ok:#2E7D5B; --rose-on-dark:#F2A2B8;
+  --ph:#FFE9A8; --on-ph:#4A3500;
+  --r-xl:28px;--r-lg:22px;--r-md:14px;--r-pill:999px;
+  --font-display:'Unbounded','Manrope',system-ui,sans-serif;
+  --font-body:'Manrope',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#1B0E17; --surface:#2A1823; --ink:#F7EAEE; --muted:#BDA5AF; --line:#44293A;
+  --accent:#E9758F; --on-accent:#1B0E17; --tint:#3A2030; --gold:#D8B27A; --ok:#7FD1A8; --rose-on-dark:#E9758F; --ph:#5A4510; --on-ph:#FFE9A8; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#1B0E17; --surface:#2A1823; --ink:#F7EAEE; --muted:#BDA5AF; --line:#44293A;
+  --accent:#E9758F; --on-accent:#1B0E17; --tint:#3A2030; --gold:#D8B27A; --ok:#7FD1A8; --rose-on-dark:#E9758F; --ph:#5A4510; --on-ph:#FFE9A8; color-scheme:dark}
+/* palettes by sphere */
+html[data-n="barber"]{--bg:#E9E7E3;--surface:#F6F5F2;--ink:#16181A;--muted:#5A5E62;--line:#CBC7BF;--accent:#9C5518;--on-accent:#FFFFFF;--tint:#E2D6C9;--gold:#7E6330;--rose-on-dark:#E0924F;--r-xl:6px;--r-lg:6px;--r-md:4px;--r-pill:4px;}
+html[data-n="cosmo"]{--bg:#F1F4EF;--surface:#FFFFFF;--ink:#1F2A24;--muted:#5A6B61;--line:#D9E1D8;--accent:#42705A;--on-accent:#FFFFFF;--tint:#E1ECE3;--gold:#7E6A36;--rose-on-dark:#A8D1B7;}
+html[data-n="other"]{--bg:#F5F2EE;--surface:#FFFFFF;--ink:#231F1C;--muted:#6B625B;--line:#E3DCD3;--accent:#8B5E3C;--on-accent:#FFFFFF;--tint:#EEE3D8;--gold:#7E6330;--rose-on-dark:#E0B48C;}
+@media (prefers-color-scheme: dark){
+ html[data-n="barber"]:not([data-theme="light"]){--bg:#121416;--surface:#1D2023;--ink:#F1EEE9;--muted:#A7A39B;--line:#34373B;--accent:#D98B45;--on-accent:#121416;--tint:#2B2621;--gold:#D8B27A;--rose-on-dark:#D98B45}
+ html[data-n="cosmo"]:not([data-theme="light"]){--bg:#101914;--surface:#1A2620;--ink:#E9F2EC;--muted:#A4B8AC;--line:#2C3D34;--accent:#86C3A0;--on-accent:#101914;--tint:#223329;--gold:#D5C28A;--rose-on-dark:#86C3A0}
+ html[data-n="other"]:not([data-theme="light"]){--bg:#1A1512;--surface:#272019;--ink:#F3ECE4;--muted:#B8AA9C;--line:#40362D;--accent:#D9A272;--on-accent:#1A1512;--tint:#342A21;--gold:#D8B27A;--rose-on-dark:#D9A272}
+}
+html[data-theme="dark"][data-n="barber"]{--bg:#121416;--surface:#1D2023;--ink:#F1EEE9;--muted:#A7A39B;--line:#34373B;--accent:#D98B45;--on-accent:#121416;--tint:#2B2621;--gold:#D8B27A;--rose-on-dark:#D98B45}
+html[data-theme="dark"][data-n="cosmo"]{--bg:#101914;--surface:#1A2620;--ink:#E9F2EC;--muted:#A4B8AC;--line:#2C3D34;--accent:#86C3A0;--on-accent:#101914;--tint:#223329;--gold:#D5C28A;--rose-on-dark:#86C3A0}
+html[data-theme="dark"][data-n="other"]{--bg:#1A1512;--surface:#272019;--ink:#F3ECE4;--muted:#B8AA9C;--line:#40362D;--accent:#D9A272;--on-accent:#1A1512;--tint:#342A21;--gold:#D8B27A;--rose-on-dark:#D9A272}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:76px}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+.wrap{max-width:1040px;margin:0 auto}
+h1,h2,h3{font-family:var(--font-display);font-weight:700;line-height:1.15;text-wrap:balance;margin:0}
+h1{font-size:clamp(26px,4.2vw,42px);letter-spacing:-.02em}
+h2{font-size:clamp(24px,4.2vw,36px);letter-spacing:-.015em}
+h3{font-size:17px;line-height:1.25}
+p{margin:0}
+section{padding-block:clamp(44px,8vw,88px)}
+.ph{background:var(--ph);color:var(--on-ph);padding:0 4px;border-radius:4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;cursor:pointer;font:800 15px var(--font-body);
+  background:var(--accent);color:var(--on-accent);padding:14px 26px;border-radius:var(--r-pill);text-decoration:none;transition:transform .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn.sm{padding:9px 18px;font-size:14px}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.ico{width:44px;height:44px;border-radius:var(--r-md);background:var(--tint);color:var(--accent);display:grid;place-items:center;flex:none}
+
+/* header */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);
+  margin-inline:calc(-1*max(16px,env(safe-area-inset-left,0px)));padding-inline:max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:12px;max-width:1040px;margin:0 auto}
+.logo{font-family:var(--font-display);font-weight:700;font-size:20px;letter-spacing:-.02em;color:var(--ink);text-decoration:none;display:block}
+.logo-sub{font-size:12.5px;color:var(--muted);font-weight:600;line-height:1.3;margin-top:1px}
+.nav{display:flex;gap:24px;font-size:14.5px;font-weight:600}
+.nav a{color:var(--ink);text-decoration:none;opacity:.8}
+.nav a:hover{opacity:1;color:var(--accent)}
+.hright{display:flex;align-items:center;gap:10px}
+.menu-btn{display:none;width:40px;height:40px;border-radius:var(--r-md);border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;align-items:center;justify-content:center}
+.mnav{display:none;padding:4px 0 12px;max-width:1040px;margin:0 auto}
+.mnav a{display:block;padding:12px 4px;border-top:1px solid var(--line);color:var(--ink);text-decoration:none;font-weight:700}
+.mnav.open{display:block}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center;padding-top:clamp(24px,4vw,40px)}
+.toptitle{padding-top:clamp(28px,5vw,56px);padding-bottom:0}
+.lead-t{font:800 clamp(28px,4.7vw,52px)/1.12 var(--font-body);letter-spacing:-.025em;margin:0;text-wrap:balance}
+.lead-s{color:var(--muted);font-weight:600;margin-top:14px;font-size:clamp(16px,2vw,20px)}
+.lead-s + .lead-s{margin-top:2px}
+.trial{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-top:14px;background:var(--tint);border:1.5px solid color-mix(in srgb,var(--accent) 45%,transparent);border-radius:var(--r-pill);padding:8px 16px;font-size:14px;color:var(--muted)}
+.trial b{color:var(--accent);font-family:var(--font-display);font-size:14px;letter-spacing:-.01em}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 8px}
+.chip-note{color:var(--muted);font-size:14px;margin:0 0 20px;min-height:1.4em}
+.chip{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:var(--r-pill);padding:8px 14px;font:600 14px var(--font-body);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.hook{font-size:clamp(18px,2.8vw,24px);margin-top:20px;max-width:30ch}
+.hook b{color:var(--accent);font-family:var(--font-display);white-space:nowrap}
+.ask{color:var(--muted);margin-top:12px}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+
+/* phone */
+.phone{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);padding:14px;max-width:380px;width:100%;margin-inline:auto;
+  box-shadow:0 24px 60px -28px color-mix(in srgb,var(--ink) 45%,transparent)}
+.phone.sm{max-width:none;padding:12px;box-shadow:none}
+.phone-head{display:flex;align-items:center;gap:10px;padding:6px 8px 12px;border-bottom:1px solid var(--line)}
+.ava{width:36px;height:36px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font:700 13px var(--font-display);flex:none}
+.phone-head b{display:block;font-size:14px;line-height:1.2}
+.phone-head small{color:var(--ok);font-size:12px}
+.msgs{display:flex;flex-direction:column;gap:8px;padding:14px 4px 4px;min-height:340px}
+.msgs.sm{min-height:0;padding-top:12px}
+.m{max-width:86%;padding:9px 13px;border-radius:16px;font-size:14px;line-height:1.45;animation:pop .5s both}
+.m.bot{background:var(--tint);border-bottom-left-radius:4px;align-self:flex-start}
+.m.me{background:var(--accent);color:var(--on-accent);border-bottom-right-radius:4px;align-self:flex-end}
+.m .btns{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.m .btns span{border:1px solid color-mix(in srgb,var(--accent) 55%,transparent);border-radius:8px;padding:4px 10px;font-size:12.5px;font-weight:700;color:var(--accent)}
+.day{align-self:center;font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;animation:pop .5s both}
+@keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.vcard{background:var(--tint);border-radius:var(--r-md);padding:14px;display:grid;gap:6px;font-size:14px}
+.vcard b{font-size:15px}
+.vcard .row{display:flex;justify-content:space-between;gap:12px;color:var(--muted)}
+.vcard .row span:last-child{color:var(--ink);font-weight:700;text-align:right}
+.vcard .btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.vcard .btns span{border:1px solid color-mix(in srgb,var(--accent) 55%,transparent);border-radius:8px;padding:5px 10px;font-size:12.5px;font-weight:700;color:var(--accent)}
+
+/* problem */
+.story{background:var(--ink);color:var(--bg);margin-inline:calc(-1*max(16px,env(safe-area-inset-left,0px)));padding-inline:max(16px,env(safe-area-inset-left,0px))}
+:root[data-theme="dark"] .story{background:var(--surface);color:var(--ink)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .story{background:var(--surface);color:var(--ink)}}
+.story h2{font-size:clamp(22px,4vw,34px)}
+.story h2 span{display:block}
+.story .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:36px;align-items:end;margin-top:22px}
+.story .big{font-family:var(--font-display);font-size:clamp(28px,5vw,44px);color:var(--rose-on-dark);font-weight:700}
+.story .sm{opacity:.85}
+.pain{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:36px}
+.pain div{border:1px solid color-mix(in srgb,currentColor 22%,transparent);border-radius:var(--r-lg);padding:18px;display:grid;gap:10px;align-content:start}
+.pain .ico{background:color-mix(in srgb,currentColor 12%,transparent);color:var(--rose-on-dark)}
+.pain p{opacity:.85;font-size:15px}
+
+/* solution */
+.sol{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:28px}
+.sol article{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:20px;display:grid;gap:12px;align-content:start}
+.sol p{color:var(--muted);font-size:15px}
+.master{margin-top:22px;background:var(--tint);border-radius:var(--r-lg);padding:22px}
+.master h3{margin-bottom:14px}
+.master ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,1fr);gap:12px 20px}
+.master li{display:flex;gap:12px;align-items:center;font-weight:600;font-size:15px}
+.master li .ico{width:38px;height:38px;background:var(--surface)}
+.soon em{font-style:normal;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);font-weight:800;margin-left:6px}
+
+/* how */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto 1fr auto;column-gap:18px;row-gap:12px;margin-top:28px;align-items:start}
+.step{display:grid;grid-row:span 3;grid-template-rows:subgrid;gap:12px;align-content:start}
+.step .phone.sm{height:100%}
+.step h3{display:flex;gap:10px;align-items:flex-start;font-size:18px}
+.step h3 i{font-style:normal;width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font:700 13px var(--font-display);flex:none}
+.step p{color:var(--muted);font-size:15px}
+
+/* calculator */
+.calc{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);padding:clamp(20px,4vw,40px);display:grid;grid-template-columns:1.1fr .9fr;gap:40px;margin-top:28px}
+.field{margin-bottom:22px}
+.field label{display:flex;justify-content:space-between;gap:12px;font-weight:600;font-size:15px;margin-bottom:8px}
+.field output{font-family:var(--font-display);font-size:14px;color:var(--accent);white-space:nowrap}
+input[type=range]{width:100%;accent-color:var(--accent);height:28px}
+.result{background:var(--tint);border-radius:var(--r-lg);padding:26px;display:flex;flex-direction:column;gap:6px;align-self:start}
+.result .lbl{font-size:14px;color:var(--muted)}
+.result .num{font-family:var(--font-display);font-size:clamp(32px,6vw,48px);font-weight:700;line-height:1.1;color:var(--ink)}
+.result .num small{font-size:.4em;color:var(--muted);font-weight:500}
+.result hr{border:0;border-top:1px solid color-mix(in srgb,var(--accent) 30%,transparent);margin:16px 0 10px;width:100%}
+.result .num.acc{color:var(--accent);font-size:clamp(26px,5vw,36px)}
+.price-line{margin-top:18px;font-weight:600}
+.note{font-size:12.5px;color:var(--muted);margin-top:14px}
+
+/* tariffs */
+.seg{display:inline-flex;flex-wrap:wrap;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-pill);padding:5px;margin-top:20px}
+.seg button{border:0;background:transparent;color:var(--ink);font:700 14px var(--font-body);padding:9px 16px;border-radius:var(--r-pill);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:26px;align-items:stretch}
+.plan{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:26px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.plan.hl{border:2px solid var(--accent)}
+.plan .p{font-family:var(--font-display);font-size:32px;font-weight:700}
+.plan .p small{font-size:14px;color:var(--muted);font-family:var(--font-body);font-weight:600}
+.plan ul{list-style:none;padding:0;margin:0;display:grid;gap:9px;font-size:14.5px;flex:1}
+.plan li{display:grid;grid-template-columns:18px 1fr;gap:8px}
+.plan li::before{content:"✓";color:var(--accent);font-weight:800}
+.plan li.soon::before{content:"○";color:var(--gold)}
+.yr-note{color:var(--muted);font-size:14px;margin-top:10px}
+.plan .yr{color:var(--muted);font-size:13.5px;margin-top:-6px}.plan .yr s{opacity:.7}
+.plan .tag{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.swipe{display:none;color:var(--muted);font-size:13px;margin-top:14px}
+
+/* join */
+.final{background:var(--tint);border-radius:var(--r-xl);padding:clamp(24px,5vw,56px);display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:center}
+form{display:grid;gap:12px}
+form input,form select{width:100%;padding:14px 16px;border-radius:var(--r-md);border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:600 15px var(--font-body)}
+.chk{display:grid;grid-template-columns:20px 1fr;gap:10px;align-items:start;font-size:14px;color:var(--muted)}
+.chk input{width:18px;height:18px;margin-top:3px;accent-color:var(--accent)}
+.chk a{color:var(--accent)}
+.thanks{background:var(--surface);border-radius:var(--r-md);padding:14px 16px;font-size:14px;border:1.5px solid var(--ok)}
+
+/* footer */
+footer{border-top:1px solid var(--line);padding-block:40px 56px;display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr;gap:28px;font-size:14.5px;color:var(--muted)}
+footer h4{margin:0 0 10px;font:800 13px var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+footer a{display:block;color:inherit;text-decoration:none;margin-bottom:6px}
+footer a:hover{color:var(--accent)}
+footer .copy{grid-column:1/-1;font-size:13px;border-top:1px solid var(--line);padding-top:18px}
+
+@media (max-width:900px){.sol{grid-template-columns:repeat(2,1fr)}.nav{display:none}.menu-btn{display:flex}}
+@media (max-width:820px){
+  .hero,.calc,.final,.story .grid,.steps{grid-template-columns:1fr;gap:28px}
+  .steps{grid-template-rows:none}.step{grid-row:auto;grid-template-rows:none}
+  .lead-t br{display:none}
+  .pain{grid-template-columns:1fr}
+  .master ul{grid-template-columns:1fr}
+  .msgs{min-height:0}
+  footer{grid-template-columns:1fr 1fr}
+  .plans{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;
+    margin-inline:calc(-1*max(16px,env(safe-area-inset-left,0px)));padding:4px max(16px,env(safe-area-inset-left,0px)) 10px;scroll-padding-inline:max(16px,env(safe-area-inset-left,0px))}
+  .plan{flex:0 0 82%;scroll-snap-align:start}
+  .swipe{display:block}
+}
+@media (max-width:560px){.sol{grid-template-columns:1fr}footer{grid-template-columns:1fr}}
+.faq{display:grid;gap:10px;margin-top:22px;max-width:760px}
+.faq details{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:0 20px}
+.faq summary{cursor:pointer;list-style:none;padding:16px 30px 16px 0;font-weight:800;position:relative}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";position:absolute;right:0;top:50%;transform:translateY(-50%);font-size:22px;color:var(--accent);font-weight:700}
+.faq details[open] summary::after{content:"−"}
+.faq details p{color:var(--muted);margin:0 0 16px}
+.consent{position:fixed;z-index:40;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));max-width:560px;margin-inline:auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;box-shadow:0 12px 40px rgba(42,21,32,.18);display:grid;gap:12px}
+.consent[hidden]{display:none}
+.consent a{color:var(--accent);font-weight:700}
+.consent p{margin:0;font-size:14px;line-height:1.5}
+.consent .row{display:flex;gap:10px;flex-wrap:wrap}
+@media (prefers-reduced-motion:reduce){.m,.day{animation:none}.btn{transition:none}html{scroll-behavior:auto}}
+</style>
+
+<header class="top"><div class="bar">
+  <div><a class="logo" href="./">ZavitAi</a><div class="logo-sub">AI адміністратор 24/7</div></div>
+  <nav class="nav"><a href="#how">Як це працює</a><a href="#calc">Калькулятор</a><a href="#plans">Тарифи</a><a href="#faq">Питання</a><a href="about.html">Про ZavitAi</a></nav>
+  <div class="hright"><a class="btn sm" href="#join">Підключити</a>
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Меню" aria-expanded="false" aria-controls="mnav"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
+</div>
+<nav class="mnav" id="mnav" aria-label="Меню"><a href="#how">Як це працює</a><a href="#calc">Калькулятор</a><a href="#plans">Тарифи</a><a href="#faq">Питання</a><a href="about.html">Про ZavitAi</a></nav></header>
+
+<div class="wrap">
+<section class="toptitle">
+  <h2 class="lead-t">AI-адміністратор у Telegram: консультує, записує, нагадує і повертає тих, хто забув записатись</h2>
+  <p class="lead-s">На зв'язку 24/7, поки Ви працюєте чи відпочиваєте</p>
+</section>
+<section class="hero" style="padding-bottom:clamp(32px,6vw,64px)">
+  <div>
+    <p class="trial"><b>30 днів безкоштовно</b><span>на адаптацію: клієнти підключаються, а Ви бачите результат</span></p>
+    <div class="chips" id="chips" role="group" aria-label="Ваша сфера"></div>
+    <p class="chip-note" id="chipNote"></p>
+    <h1 id="h1">Клієнтка не прийшла і не попередила</h1>
+    <p class="hook">Одне пропущене вікно — це <b id="hookSum">~700 грн</b>, які Ви втратили.</p>
+    <p class="ask">А скільки таких вікон у Вас за місяць?</p>
+    <div class="cta-row">
+      <a class="btn" href="#join">Підключити AI-адміністратора</a>
+      <a class="btn ghost" href="#calc">Порахувати свої цифри</a>
+    </div>
+  </div>
+  <div class="phone" aria-label="Приклад діалогу з AI-адміністратором">
+    <div class="phone-head"><div class="ava">AI</div><div><b>AI-адміністратор · Салон Оксани</b><small>онлайн</small></div></div>
+    <div class="msgs" id="msgs"></div>
+  </div>
+</section>
+</div>
+
+<div class="story"><div class="wrap"><section id="problem">
+  <h2 id="storyH"></h2>
+  <div class="grid">
+    <p class="sm" style="font-size:18px;max-width:42ch">Такі клієнти є у кожного майстра. Вони не образились і не пішли. Просто ніхто їм не нагадав.</p>
+    <div><div class="big" id="storySum">~4 200 грн</div><p class="sm" style="margin-top:6px" id="storyCap"></p></div>
+  </div>
+  <div class="pain">
+    <div><span class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></span><h3>No-show</h3><p>Клієнт не прийшов і не попередив. Вікно в графіку пропало, а гроші за нього вже не повернути.</p></div>
+    <div><span class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span><h3>Порожні вікна</h3><p>Вільний час є, а клієнтів, яким він підійшов би, ніхто не покликав.</p></div>
+    <div><span class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M17 8l5 5M22 8l-5 5"/></svg></span><h3>Клієнти, які зникли</h3><p>Минуло кілька тижнів, клієнт забув записатись, а нагадати нікому.</p></div>
+  </div>
+</section></div></div>
+
+<div class="wrap">
+<section id="solution">
+  <h2>AI-адміністратор бере рутину на себе</h2>
+  <div class="sol">
+    <article><span class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span><h3>Консультує і записує</h3><p>Відповідає на запитання про послуги й ціни та записує клієнта на вільний час.</p></article>
+    <article><span class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg></span><h3>Пропонує додаткові послуги до запису</h3><p id="solAdd"></p></article>
+    <article><span class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span><h3>Нагадує про візит</h3><p>Підтвердження за добу й перенесення в один дотик, без дзвінків і переписок, які відволікають.</p></article>
+    <article><span class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 4v6h6"/><path d="M3.5 15a9 9 0 1 0 2.1-9.4L1 10"/></svg></span><h3>Win-back клієнта</h3><p>Повертає тих, хто давно не був, м'яким повідомленням від імені салону.</p></article>
+  </div>
+  <div class="master">
+    <h3>А Вам лишається працювати: інструменти майстра</h3>
+    <ul>
+      <li><span class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M15 9h3M15 13h3M6 17c.6-1.5 1.8-2 3-2s2.4.5 3 2"/></svg></span>Картка візиту: хто прийшов і на яку послугу</li>
+      <li><span class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>Нотатки й ціна, «що робили минулого разу»</li>
+      <li><span class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span>«Зайнято» і відпустка: бот не пропонує години й дні з блокнота; списки записів</li>
+      <li class="soon"><span class="ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20V10M18 20V4M6 20v-4"/></svg></span><span>Аналітика «скільки Ви заробили»<em>скоро</em></span></li>
+    </ul>
+  </div>
+</section>
+
+<section id="how" style="padding-top:0">
+  <h2>Як це виглядає</h2>
+  <div class="steps">
+    <div class="step"><h3><i>1</i>Клієнт пише боту</h3>
+      <div class="phone sm"><div class="msgs sm" id="how1"></div></div>
+      <p>Бот працює від імені Вашого салону й записує без Вашої участі.</p></div>
+    <div class="step"><h3><i>2</i>AI-адміністратор нагадує</h3>
+      <div class="phone sm"><div class="msgs sm" id="how2"></div></div>
+      <p>Клієнт підтверджує візит або переносить його сам.</p></div>
+    <div class="step"><h3><i>3</i>Ви бачите картку запису клієнта</h3>
+      <div class="phone sm"><div class="msgs sm" id="how3"></div></div>
+      <p>Перед візитом майстер знає, хто прийде, на яку послугу і що було минулого разу.</p></div>
+  </div>
+</section>
+
+<section id="calc" style="padding-top:0">
+  <h2>Порахуйте, скільки це у Вас</h2>
+  <p style="color:var(--muted);margin-top:10px;max-width:56ch">Це приклад для обраної сфери. Змініть повзунки на свої значення.</p>
+  <div class="calc">
+    <div>
+      <div class="field"><label for="visits">Візитів на тиждень <output id="o_visits"></output></label><input id="visits" type="range" min="5" max="60" step="1"></div>
+      <div class="field"><label for="check">Середній чек <output id="o_check"></output></label><input id="check" type="range" min="200" max="3000" step="50"></div>
+      <div class="field"><label for="miss">Скільки візитів зривається (no-show) <output id="o_miss"></output></label><input id="miss" type="range" min="0" max="30" step="1"></div>
+      <div class="field"><label for="lost">Клієнтів, які зникли за місяць <output id="o_lost"></output></label><input id="lost" type="range" min="0" max="30" step="1"></div>
+    </div>
+    <div>
+      <div class="result" aria-live="polite">
+        <span class="lbl">Ви втрачаєте приблизно</span>
+        <span class="num"><span id="loss">0</span> <small>грн / міс</small></span>
+        <hr>
+        <span class="lbl">Скільки з цього Ви хотіли б повернути (win-back)?</span>
+        <div class="field" style="margin:8px 0 4px"><label for="back" style="margin-bottom:2px">Частка <output id="o_back"></output></label><input id="back" type="range" min="5" max="50" step="5"></div>
+        <span class="num acc"><span id="gain">0</span> <small>грн / міс</small></span>
+      </div>
+      <p class="price-line">ZavitAi — від <span id="priceFrom">500</span> грн на місяць.</p>
+      <p class="note">Розрахунок спирається на значення, які Ви вказали.</p>
+    </div>
+  </div>
+</section>
+
+<section id="plans" style="padding-top:0">
+  <h2>Тарифи</h2>
+  <div class="seg" id="seg" role="group" aria-label="Кількість майстрів"></div>
+  <div class="seg" id="seg2" role="group" aria-label="Період оплати" style="margin-left:10px"></div>
+  <p class="yr-note" id="yrNote">Можна оплатити одразу за рік зі знижкою 20%.</p>
+  <div class="plans" id="planGrid"></div>
+  <p class="swipe">Гортайте вбік, щоб побачити всі тарифи →</p>
+  <p class="note">Назви тарифів і набір функцій у макеті робочі. Позначка «скоро» означає, що функція ще в розробці.</p>
+  <div class="cta-row"><a class="btn" href="#join">Підключити</a></div>
+</section>
+
+<section id="faq" style="padding-top:0">
+  <h2>Питання й відповіді</h2>
+  <div class="faq">
+    <details><summary>Що таке ZavitAi?</summary><p>AI-адміністратор у Telegram. Він консультує клієнтів щодо послуг і цін, записує їх у вільні години, нагадує про візит і повертає тих, хто давно не був. Працює від імені Вашого салону, а майстер бачить усі записи й картки клієнтів і може керувати ними через Telegram та у своєму кабінеті. Також у Telegram можна побачити записи на будь-який обраний день і нотатку про те, що робили минулого візиту.</p></details>
+    <details><summary>Куди потрапляють записи клієнтів?</summary><p>У Ваш особистий кабінет. Там календар записів, список клієнтів, налаштування послуг, графіка, вихідних і відпустки. Вхід за логіном і паролем, і кожен салон бачить лише свої дані. Записи та нотатки також доступні в Telegram.</p></details>
+    <details><summary>Для кого це?</summary><p>Для косметологів, салонів краси (перукарі, манікюрниці, Lash &amp; Brow майстри), барбершопів та інших майстрів краси, від одного майстра до команди з десяти.</p></details>
+    <details><summary>Як клієнти потрапляють до бота?</summary><p>Бот працює під назвою Вашого салону. Клієнт відкриває його за посиланням (з Instagram, візитки чи QR-коду) і пише. Нагадування бот надсилає лише тим, хто вже відкривав його: так влаштований Telegram.</p></details>
+    <details><summary>Чи потрібно клієнтам щось встановлювати?</summary><p>Ні, лише мати Telegram. Якщо клієнт ним не користується, записати його через бота не вийде, але майстер може сам забронювати для нього місце у своєму кабінеті.</p></details>
+    <details><summary>У мене вже є записи в блокноті. Що з ними робити?</summary><p>Позначте години й дні, які вже зайняті, кнопкою «Зайнято». Бот не пропонуватиме їх клієнтам. У тарифі Profit ми ще й внесемо список Ваших послуг і цін у кабінет замість Вас.</p></details>
+    <details><summary>Скільки це коштує?</summary><p>Від 500 грн на місяць, залежно від кількості майстрів і тарифу. Перші 30 днів безкоштовні, а оплата за рік одразу дає знижку 20%. Усі ціни в розділі «Тарифи».</p></details>
+    <details><summary>Що буде після 30 безкоштовних днів?</summary><p>Далі підписка діє щомісяця. Скасувати її можна будь-коли, а якщо скасувати до завершення пробного періоду, жодних списань не буде.</p></details>
+    <details><summary>Хто допоможе з налаштуванням?</summary><p>Ми. Допомагаємо підключити AI-адміністратора до Вашого салону, а також забезпечуємо постійний супровід і комунікацію. Пишіть у Telegram <a href="https://t.me/Zavit_Ai">@Zavit_Ai</a>.</p></details>
+  </div>
+</section>
+
+<section id="join" style="padding-top:0">
+  <div class="final">
+    <div>
+      <h2>Підключіться, спробуйте і подивіться, як це працює саме у Вас</h2>
+      <p style="margin-top:14px;color:var(--muted)">30 днів безкоштовно на адаптацію. Залиште контакт, і ми допоможемо налаштувати AI-адміністратора під Ваш салон.</p>
+    </div>
+    <div>
+      <form id="form" autocomplete="off">
+        <input id="f_name" placeholder="Ім'я або назва салону" required>
+        <input id="f_contact" placeholder="Телефон або Telegram" required>
+        <select id="f_team"><option>1–2 майстри</option><option>3–5 майстрів</option><option>6–10 майстрів</option></select>
+        <label class="chk"><input type="checkbox" id="f_consent" required><span>Погоджуюсь з <a href="offer.html">публічною офертою</a> та <a href="privacy.html">політикою конфіденційності</a></span></label>
+        <button class="btn" type="submit">Підключити AI-адміністратора</button>
+        <div class="thanks" id="thanks" hidden>Це макет сторінки: заявка поки нікуди не надсилається.</div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div><a class="logo" href="./" style="margin-bottom:8px">ZavitAi</a><p>AI-адміністратор у Telegram для салонів краси, барбершопів і косметологів.</p></div>
+  <div><h4>Сторінка</h4><a href="#how">Як це працює</a><a href="#calc">Калькулятор</a><a href="#plans">Тарифи</a><a href="#faq">Питання</a><a href="about.html">Про ZavitAi</a></div>
+  <div><h4>Документи</h4><a href="offer.html">Публічна оферта</a><a href="privacy.html">Політика конфіденційності</a></div>
+  <div><h4>Контакти</h4><p><a href="mailto:zavitaiadmin@gmail.com">zavitaiadmin@gmail.com</a></p><p><a href="https://t.me/Zavit_Ai">@Zavit_Ai</a></p></div>
+  <p class="copy">© ZavitAi, 2026</p>
+</footer>
+</div>
+
+<div class="consent" id="consent" role="dialog" aria-label="Згода на аналітику" hidden>
+  <p>Ми використовуємо аналітику (Google Analytics і Microsoft Clarity), щоб бачити, скільки людей відвідує сайт, звідки вони приходять і до якого місця сторінки гортають. Без Вашої згоди вона не вмикається. <a href="privacy.html">Докладніше</a></p>
+  <div class="row"><button class="btn sm" id="cYes" type="button">Прийняти</button><button class="btn sm ghost" id="cNo" type="button">Відхилити</button></div>
+</div>
+
+<script>
+var NICHES={
+ cosmo:{name:'Косметологія',note:'Для косметологів та естетичних кабінетів',g:'f',grp:'cosmo',acc:'чистку обличчя',nom:'чистка обличчя',add:'маску для обличчя',firm:'кабінету',check:1500,visits:15,miss:8,lost:5,nm:'Ірина',last:'чутлива шкіра, без кислот'},
+ salon:{name:'Салон краси',note:'Для перукарів, манікюрниць, Lash & Brow майстрів',g:'f',grp:'salon',acc:'манікюр з покриттям',nom:'манікюр з покриттям',add:'догляд для рук',firm:'салону',check:900,visits:25,miss:10,lost:7,nm:'Ірина',last:'гель-лак, база rubber, форма мигдаль'},
+ barber:{name:'Барбершоп',note:'Для барбершопів і чоловічих майстрів',g:'m',grp:'barber',acc:'стрижку',nom:'стрижка',add:'моделювання бороди',firm:'барбершопу',check:500,visits:40,miss:8,lost:10,nm:'Максим',last:'фейд 2 мм, борода по лінії'},
+ other:{name:'Інше',note:'Для майстрів інших напрямів краси',g:'f',grp:'other',acc:'візит',nom:'візит',add:'додаткову послугу',firm:'майстра',check:800,visits:20,miss:10,lost:6,nm:'Ірина',last:'є нотатка з минулого візиту'}
+};
+var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var cur='salon';
+function $(id){return document.getElementById(id)}
+function fmt(n){return Math.round(n).toLocaleString('uk-UA')}
+
+function renderChips(){
+  var h='';
+  Object.keys(NICHES).forEach(function(k){h+='<button type="button" class="chip" data-k="'+k+'" aria-pressed="'+(k===cur)+'">'+NICHES[k].name+'</button>'});
+  $('chips').innerHTML=h;
+}
+$('chips').addEventListener('click',function(e){var b=e.target.closest('.chip');if(b){setNiche(b.getAttribute('data-k'))}});
+
+function renderChat(n){
+  var d=function(i){return reduce?'':'animation-delay:'+(0.4+i*0.9)+'s'};
+  $('msgs').innerHTML=[
+   '<div class="m me" style="'+d(0)+'">Хочу записатись на '+n.acc+'</div>',
+   '<div class="m bot" style="'+d(1)+'">Є вільно завтра об 11:00 або в четвер о 15:00. Яка година зручніша?</div>',
+   '<div class="m me" style="'+d(2)+'">Завтра об 11:00</div>',
+   '<div class="m bot" style="'+d(3)+'">Записала ✅ Багато клієнтів додають '+n.add+'. Додати до запису?<div class="btns"><span>Так</span><span>Ні, дякую</span></div></div>',
+   '<div class="day" style="'+d(4)+'">наступного дня</div>',
+   '<div class="m bot" style="'+d(5)+'">Нагадую: завтра об 11:00 — '+n.nom+'. Все в силі?<div class="btns"><span>Так, буду</span><span>Перенести</span></div></div>'
+  ].join('');
+  $('how1').innerHTML='<div class="m me" style="animation:none">Хочу записатись на '+n.acc+'</div><div class="m bot" style="animation:none">Є вільно завтра об 11:00 або в четвер о 15:00. Яка година зручніша?</div>';
+  $('how2').innerHTML='<div class="m bot" style="animation:none">Нагадую: завтра об 11:00 — '+n.nom+'. Все в силі?<div class="btns"><span>Так, буду</span><span>Перенести</span></div></div>';
+  $('how3').innerHTML='<div class="vcard"><b>11:00 · '+n.nm+'</b><div class="row"><span>Послуга</span><span>'+n.nom+'</span></div><div class="row"><span>Минулого разу</span><span>'+n.last+'</span></div><div class="row"><span>Ціна</span><span>'+fmt(n.check)+' грн</span></div><div class="btns"><span>Нотатка</span><span>Завершити</span></div></div>';
+}
+
+function setNiche(k){
+  cur=k;var n=NICHES[k];
+  renderChips();
+  $('chipNote').textContent=n.note;
+  document.documentElement.setAttribute('data-n',n.grp);
+  $('h1').textContent=n.g==='m'?'Клієнт не прийшов і не попередив':'Клієнтка не прийшла і не попередила';
+  $('hookSum').textContent='~'+fmt(n.check)+' грн';
+  var L=n.g==='m'
+    ?[n.nm+' був у Вас 2 місяці тому','Він не пішов до іншого '+n.firm,'Він просто забув записатись']
+    :[n.nm+' була у Вас 2 місяці тому','Вона не пішла до іншого '+n.firm,'Вона просто забула записатись'];
+  $('storyH').innerHTML=L.map(function(x){return '<span>'+x+'</span>'}).join('');
+  $('storySum').textContent='~'+fmt(n.check*6)+' грн';
+  $('storyCap').textContent=n.g==='m'?'за рік, якщо б приходив раз на два місяці':'за рік, якщо б приходила раз на два місяці';
+  $('solAdd').textContent='Наприклад, до запису на '+n.acc+' запропонує '+n.add+', і майстер заробляє більше з тих самих візитів.';
+  renderChat(n);
+  ['visits','check','miss','lost'].forEach(function(id){$(id).value=n[id]});
+  $('back').value=20;
+  calc();
+}
+
+var shown={loss:0,gain:0};
+function tween(id,to){
+  var el=$(id);
+  if(reduce){el.textContent=fmt(to);shown[id]=to;return}
+  var from=shown[id],t0=null,dur=600;
+  function step(t){if(!t0)t0=t;var p=Math.min(1,(t-t0)/dur);var e=1-Math.pow(1-p,3);
+    el.textContent=fmt(from+(to-from)*e);if(p<1)requestAnimationFrame(step);else shown[id]=to}
+  requestAnimationFrame(step);
+}
+function calc(){
+  var v=+$('visits').value,c=+$('check').value,m=+$('miss').value,l=+$('lost').value,b=+$('back').value;
+  $('o_visits').textContent=v;$('o_check').textContent=fmt(c)+' грн';$('o_miss').textContent=m+'%';$('o_lost').textContent=l;$('o_back').textContent=b+'%';
+  var loss=v*4.33*(m/100)*c+l*c;
+  tween('loss',loss);tween('gain',loss*b/100);
+}
+['visits','check','miss','lost','back'].forEach(function(id){$(id).addEventListener('input',calc)});
+
+var PACKS=[{k:'1–2 майстри',p:[500,900,1300]},{k:'3–5 майстрів',p:[1500,2100,2700]},{k:'6–10 майстрів',p:[3000,3600,4200]}];
+var PLANS=[
+ {n:'Book',tag:'Запис і порядок',f:['Запис, консультація, пропозиція додаткової послуги','Нагадування про візит і перенесення','«Зайнято» і відпустка (години й дні з блокнота), списки записів','Картка візиту: хто прийшов і на яку послугу','Дашборд: календар, клієнти, налаштування']},
+ {n:'Grow',tag:'Пам\'ять і повернення',hl:true,f:['Усе з Book','Нотатки, ціна, «що робили клієнтці минулого разу»','Вечірнє нагадування майстру','Win-back клієнта: нагадування тим, хто зник','Дашборд: список клієнтів, які зникли']},
+ {n:'Profit',tag:'Те, що заробляє',f:['Усе з Grow','Список послуг і цін внесемо в кабінет замість Вас','Друге нагадування win-back і причини відмови','Аналітика «скільки Ви заробили»|soon','Заповнення вікон і лист очікування|soon','Розсилка вільних вікон|soon']}
+];
+var pack=0,yearly=false;
+function renderPlans(){
+  var s='';PACKS.forEach(function(p,i){s+='<button type="button" data-i="'+i+'" aria-pressed="'+(i===pack)+'">'+p.k+'</button>'});
+  $('seg').innerHTML=s;
+  $('seg2').innerHTML='<button type="button" data-y="0" aria-pressed="'+(!yearly)+'">Щомісяця</button><button type="button" data-y="1" aria-pressed="'+yearly+'">На рік −20%</button>';
+  var h='';
+  PLANS.forEach(function(pl,i){
+    h+='<div class="plan'+(pl.hl?' hl':'')+'"><div class="tag">'+pl.tag+'</div><h3 style="font-size:24px">'+pl.n+'</h3><div class="p">'+fmt(yearly?Math.round(PACKS[pack].p[i]*0.8):PACKS[pack].p[i])+' <small>грн / міс</small></div>'+(yearly?'<div class="yr">'+fmt(Math.round(PACKS[pack].p[i]*12*0.8))+' грн за рік <s>'+fmt(PACKS[pack].p[i]*12)+'</s> · знижка 20%</div>':'')+'<ul>';
+    pl.f.forEach(function(x){var a=x.split('|');h+='<li'+(a[1]?' class="soon"':'')+'><span>'+a[0]+(a[1]?' <em style="font-style:normal;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);font-weight:800">скоро</em>':'')+'</span></li>'});
+    h+='</ul></div>';
+  });
+  $('planGrid').innerHTML=h;
+  $('priceFrom').textContent=fmt(PACKS[pack].p[0]);
+}
+$('seg2').addEventListener('click',function(e){var b=e.target.closest('button');if(b){yearly=b.getAttribute('data-y')==='1';renderPlans()}});
+$('seg').addEventListener('click',function(e){var b=e.target.closest('button');if(b){pack=+b.getAttribute('data-i');renderPlans()}});
+$('form').addEventListener('submit',function(e){e.preventDefault();$('thanks').hidden=false});
+
+$('menuBtn').addEventListener('click',function(){var o=$('mnav').classList.toggle('open');this.setAttribute('aria-expanded',o)});
+$('mnav').addEventListener('click',function(e){if(e.target.tagName==='A'){$('mnav').classList.remove('open');$('menuBtn').setAttribute('aria-expanded','false')}});
+
+/* Аналітика. Вставте ID, щоб увімкнути: GA_ID виглядає як G-XXXXXXXXXX, CLARITY_ID це короткий код проєкту. Поки ID порожні, банер і трекінг не з'являються. */
+var GA_ID='',CLARITY_ID='';
+var CK='zavitai_consent';
+function getC(){try{return localStorage.getItem(CK)}catch(e){return null}}
+function setC(v){try{localStorage.setItem(CK,v)}catch(e){}}
+function track(){
+  if(!window.gtag)return;
+  var done={};
+  window.addEventListener('scroll',function(){
+    var h=document.documentElement,pc=Math.round((window.scrollY+window.innerHeight)/h.scrollHeight*100);
+    [25,50,75,100].forEach(function(m){if(pc>=m&&!done[m]){done[m]=1;gtag('event','scroll_depth',{percent:m})}});
+  },{passive:true});
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){gtag('event','section_view',{section:e.target.id});io.unobserve(e.target)}})},{threshold:.4});
+    ['problem','how','calc','plans','join'].forEach(function(id){var el=$(id);if(el)io.observe(el)});
+  }
+  document.addEventListener('click',function(e){var a=e.target.closest('a.btn');if(a)gtag('event','cta_click',{target:a.getAttribute('href')})});
+}
+function loadAnalytics(){
+  if(GA_ID){
+    var g=document.createElement('script');g.async=true;g.src='https://www.googletagmanager.com/gtag/js?id='+GA_ID;document.head.appendChild(g);
+    window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};
+    gtag('js',new Date());gtag('config',GA_ID);track();
+  }
+  if(CLARITY_ID){
+    (function(c,l,a,rr,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(rr);t.async=1;t.src='https://www.clarity.ms/tag/'+i;y=l.getElementsByTagName(rr)[0];y.parentNode.insertBefore(t,y)})(window,document,'clarity','script',CLARITY_ID);
+  }
+}
+if(GA_ID||CLARITY_ID){var cc=getC();if(cc==='yes')loadAnalytics();else if(!cc)$('consent').hidden=false}
+$('cYes').addEventListener('click',function(){setC('yes');$('consent').hidden=true;loadAnalytics()});
+$('cNo').addEventListener('click',function(){setC('no');$('consent').hidden=true});
+renderPlans();setNiche('salon');
+</script>
